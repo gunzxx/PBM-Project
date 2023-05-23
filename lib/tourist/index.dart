@@ -107,6 +107,7 @@ class _HomeState extends State<Home> {
                           ),
                           title: Text(item['name']),
                           subtitle: Text(category['name']),
+                          hoverColor: Color.fromRGBO(255, 255, 255, .3),
                           onTap: () {
                             showDialog(
                                 context: context,
