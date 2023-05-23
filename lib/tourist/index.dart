@@ -20,7 +20,7 @@ class _HomeState extends State<Home> {
     try {
       final response = await http
           .get(Uri.parse('https://paa.gunzxx.my.id/api/tourist'))
-          .timeout(Duration(seconds: 30));
+          .timeout(const Duration(seconds: 30));
       if (response.statusCode == 200) {
         return jsonDecode(response.body)['data'];
       } else {
@@ -54,17 +54,17 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xfff6efdc),
+      backgroundColor: const Color(0xfff6efdc),
       appBar: AppBar(
-        backgroundColor: Color(0xffaddbd0),
-        title: Text(
+        backgroundColor: const Color(0xffaddbd0),
+        title: const Text(
           "Pariwisata Jember",
           style: TextStyle(color: c1),
         ),
       ),
       body: Center(
         child: Container(
-          padding: EdgeInsets.all(15),
+          padding: const EdgeInsets.all(15),
           child: RefreshIndicator(
             onRefresh: () {
               setState(() {
@@ -87,7 +87,8 @@ class _HomeState extends State<Home> {
                       Text(_errorMessage.isNotEmpty
                           ? _errorMessage
                           : "Data gagal diambil"),
-                      TextButton(onPressed: _refreshData, child: Text("Ulangi"))
+                      TextButton(
+                          onPressed: _refreshData, child: const Text("Ulangi"))
                     ],
                   );
                 } else if (snapshot.hasData) {
@@ -121,7 +122,7 @@ class _HomeState extends State<Home> {
                                               MainAxisAlignment.center,
                                           children: [
                                             Container(
-                                              margin: EdgeInsets.only(
+                                              margin: const EdgeInsets.only(
                                                   top: 10, bottom: 10),
                                               height: 100,
                                               child:
@@ -131,7 +132,7 @@ class _HomeState extends State<Home> {
                                         ),
                                         Text("Lokasi : ${item['location']}"),
                                         Container(
-                                          margin: EdgeInsets.only(
+                                          margin: const EdgeInsets.only(
                                               top: 10, bottom: 10),
                                           child: Text(item['description']),
                                         ),
@@ -142,7 +143,7 @@ class _HomeState extends State<Home> {
                                           onPressed: () {
                                             Navigator.of(context).pop();
                                           },
-                                          child: Text("OK"))
+                                          child: const Text("OK"))
                                     ],
                                   );
                                 });
@@ -152,7 +153,7 @@ class _HomeState extends State<Home> {
                     },
                   );
                 } else {
-                  return Text("Tidak ada data");
+                  return const Text("Tidak ada data");
                 }
               },
             ),
