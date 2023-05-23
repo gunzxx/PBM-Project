@@ -1,13 +1,19 @@
-// class Coba extends StatefulWidget {
-//   const Coba({super.key});
+import 'package:flutter/material.dart';
 
-//   @override
-//   State<Coba> createState() => _CobaState();
-// }
+import 'tourist/index.dart';
 
-// class _CobaState extends State<Coba> {
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Placeholder();
-//   }
-// }
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: MaterialApp(
+        home: Home(),
+        debugShowCheckedModeBanner: false,
+      ),
+    );
+  }
+}
