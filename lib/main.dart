@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'tourist/index.dart';
+import '../mylib/jwt.dart';
 
-void main() => runApp(const MyApp());
+void main() {
+  getToken().then((value) => print(value));
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

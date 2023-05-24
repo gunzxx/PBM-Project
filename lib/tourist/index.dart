@@ -1,9 +1,9 @@
-import 'dart:convert';
+import 'dart:convert' show jsonDecode;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http show get;
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
 
-import '../color.dart';
+import '../mylib/color.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -108,7 +108,7 @@ class _HomeState extends State<Home> {
                           title: Text(item['name']),
                           subtitle: Text(category['name']),
                           hoverColor: Color.fromRGBO(255, 255, 255, .3),
-                          onTap: () {
+                          onTap: () async {
                             showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
