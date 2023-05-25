@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-import 'tourist/index.dart';
-import '../mylib/jwt.dart';
+import 'auth/login.dart';
+import 'home.dart';
+import 'mylib/auth.dart' show authCheck;
+import 'mylib/color.dart';
 
-void main() {
-  getToken().then((value) => print(value));
-  runApp(const MyApp());
+void main() async {
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,8 +18,34 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: MaterialApp(
-        home: Home(),
         debugShowCheckedModeBanner: false,
+        home: FutureBuilder(
+          future: authCheck(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SpinKitCubeGrid(
+                    color: c2,
+                    size: 50.0,
+                  ),
+                ],
+              );
+            } else if (snapshot.hasError) {
+              return const Text("Data gagal diambil");
+            } else if (snapshot.hasData) {
+              final data = snapshot.data!;
+              if (data || data == true) {
+                return Login();
+              } else {
+                return Home();
+              }
+            } else {
+              return const Text("Tidak ada data");
+            }
+          },
+        ),
       ),
     );
   }
