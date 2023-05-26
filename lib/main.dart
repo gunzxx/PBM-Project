@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'auth/login.dart';
 import 'home.dart';
@@ -8,7 +7,7 @@ import 'mylib/auth.dart' show authCheck;
 import 'mylib/color.dart';
 
 void main() async {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -37,9 +36,9 @@ class MyApp extends StatelessWidget {
             } else if (snapshot.hasData) {
               final data = snapshot.data!;
               if (data || data == true) {
-                return Login();
+                return const Login();
               } else {
-                return Home();
+                return const Home();
               }
             } else {
               return const Text("Tidak ada data");

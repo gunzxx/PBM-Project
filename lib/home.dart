@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'profile/index.dart';
 import 'tourist/index.dart';
 import 'tourist/search.dart';
 
@@ -13,17 +14,19 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _currentPage = 0;
 
-  List<Widget> _screens = [
+  final List<Widget> _screens = [
+    Search(),
     Tourist(),
-    Search(),
-    Search(),
+    MapGoogle(),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Pariwisata Jember')),
-      body: _screens[_currentPage],
+      body: IndexedStack(
+        index: _currentPage,
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentPage,
         onTap: (value) {
