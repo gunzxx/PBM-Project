@@ -102,12 +102,12 @@ class _TouristState extends State<Tourist> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: const Color(0xfff6efdc),
+        backgroundColor: w1,
         appBar: AppBar(
-          backgroundColor: const Color(0xffaddbd0),
+          backgroundColor: bl1,
           title: const Text(
             "Pariwisata Jember",
-            style: TextStyle(color: c1),
+            style: TextStyle(color: b1),
           ),
         ),
         body: Center(
@@ -152,7 +152,7 @@ class _TouristState extends State<Tourist> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SpinKitCubeGrid(
-                                color: c2,
+                                color: bl1,
                                 size: 50.0,
                               ),
                             ],

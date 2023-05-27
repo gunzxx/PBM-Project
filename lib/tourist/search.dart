@@ -69,12 +69,12 @@ class _SearchState extends State<Search> {
         FocusScope.of(context).unfocus();
       },
       child: Scaffold(
-        backgroundColor: const Color(0xfff6efdc),
+        backgroundColor: w1,
         appBar: AppBar(
-          backgroundColor: const Color(0xffaddbd0),
+          backgroundColor: bl1,
           title: const Text(
             "Pariwisata Jember",
-            style: TextStyle(color: c1),
+            style: TextStyle(color: b1),
           ),
         ),
         body: Center(
@@ -91,7 +91,7 @@ class _SearchState extends State<Search> {
                       hintText: 'Cari...',
                       suffixIcon: _searchFocusNode.hasFocus
                           ? IconButton(
-                              icon: Icon(Icons.close),
+                              icon: const Icon(Icons.close),
                               onPressed: () {
                                 setState(() {
                                   _searchFocusNode.unfocus();
@@ -101,7 +101,7 @@ class _SearchState extends State<Search> {
                               },
                             )
                           : IconButton(
-                              icon: Icon(Icons.search),
+                              icon: const Icon(Icons.search),
                               onPressed: () {
                                 _searchApi();
                               },
@@ -115,7 +115,7 @@ class _SearchState extends State<Search> {
                     },
                   ),
                 ),
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 Expanded(
                   child: RefreshIndicator(
                     onRefresh: () {
@@ -130,11 +130,11 @@ class _SearchState extends State<Search> {
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Column(
+                          return const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               SpinKitCubeGrid(
-                                color: c2,
+                                color: bl1,
                                 size: 50.0,
                               ),
                             ],
@@ -153,8 +153,8 @@ class _SearchState extends State<Search> {
                           );
                         } else if (snapshot.hasData) {
                           final data = snapshot.data!;
-                          return data.length < 1
-                              ? Text("Tidak ada data.")
+                          return data.isEmpty
+                              ? const Text("Tidak ada data.")
                               : ListView.builder(
                                   itemCount: data.length,
                                   itemBuilder: (context, index) {
@@ -162,15 +162,15 @@ class _SearchState extends State<Search> {
                                     final category = item['category'];
                                     return Card(
                                       child: ListTile(
-                                        leading: Container(
+                                        leading: SizedBox(
                                           width: 60,
                                           child: Image.network(item['thumb'],
                                               fit: BoxFit.cover),
                                         ),
                                         title: Text(item['name']),
                                         subtitle: Text(category['name']),
-                                        hoverColor:
-                                            Color.fromRGBO(255, 255, 255, .3),
+                                        hoverColor: const Color.fromRGBO(
+                                            255, 255, 255, .3),
                                         onTap: () async {
                                           showDialog(
                                               context: context,

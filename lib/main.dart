@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SpinKitCubeGrid(
-                    color: c2,
+                    color: bl1,
                     size: 50.0,
                   ),
                 ],

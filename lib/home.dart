@@ -11,7 +11,7 @@ import 'package:flutter/material.dart'
         Icon,
         Icons;
 import 'bookmark/index.dart' show BookMark;
-import 'profile/index.dart' show MapGoogle;
+import 'profile/map.dart' show MapGoogle;
 import 'tourist/index.dart' show Tourist;
 
 class Home extends StatefulWidget {
