@@ -1,8 +1,18 @@
-import 'package:flutter/material.dart';
-
-import 'profile/index.dart';
-import 'tourist/index.dart';
-import 'tourist/search.dart';
+import 'package:flutter/material.dart'
+    show
+        StatefulWidget,
+        State,
+        BuildContext,
+        Widget,
+        Scaffold,
+        IndexedStack,
+        BottomNavigationBar,
+        BottomNavigationBarItem,
+        Icon,
+        Icons;
+import 'bookmark/index.dart' show BookMark;
+import 'profile/index.dart' show MapGoogle;
+import 'tourist/index.dart' show Tourist;
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -15,8 +25,8 @@ class _HomeState extends State<Home> {
   int _currentPage = 0;
 
   final List<Widget> _screens = [
-    Search(),
-    Tourist(),
+    const Tourist(),
+    const BookMark(),
     MapGoogle(),
   ];
 
@@ -34,7 +44,7 @@ class _HomeState extends State<Home> {
             _currentPage = value;
           });
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: "Beranda",
