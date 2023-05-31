@@ -36,6 +36,7 @@ dependencies:
   geolocator: ^7.1.1
   geocoding: ^2.1.0
   connectivity_plus: ^4.0.1
+  flutter_launcher_icons: "^0.13.1"
   shared_preferences: ^2.1.1
   # flutter_secure_storage: ^8.0.0
 
@@ -67,8 +68,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

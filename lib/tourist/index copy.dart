@@ -116,7 +116,7 @@ class _TouristState extends State<Tourist> {
             child: Column(
               children: [
                 Container(
-                  margin: EdgeInsets.only(top: 5, bottom: 30),
+                  margin: EdgeInsets.only(bottom: 30),
                   child: TextField(
                     focusNode: _searchInput,
                     onTap: () {
@@ -126,7 +126,6 @@ class _TouristState extends State<Tourist> {
                           MaterialPageRoute(
                               builder: (context) => const Search()));
                     },
-                    enableInteractiveSelection: false,
                     textInputAction: TextInputAction.search,
                     decoration: const InputDecoration(
                       hintText: 'Cari...',
@@ -163,7 +162,6 @@ class _TouristState extends State<Tourist> {
                         } else if (snapshot.hasError ||
                             _errorMessage.isNotEmpty) {
                           return Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(_errorMessage.isNotEmpty
                                   ? _errorMessage
@@ -186,12 +184,7 @@ class _TouristState extends State<Tourist> {
                                       child: ListTile(
                                         leading: SizedBox(
                                           width: 60,
-                                          // child: Image.network(item['thumb'],
-                                          //     fit: BoxFit.cover),
-                                          child: Image.network(
-                                              item["thumb"] != ""
-                                                  ? item["thumb"]
-                                                  : "https://paa.gunzxx.my.id/img/tourist/default.png",
+                                          child: Image.network(item['thumb'],
                                               fit: BoxFit.cover),
                                         ),
                                         title: Text(item['name']),

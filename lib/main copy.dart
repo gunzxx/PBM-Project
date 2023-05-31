@@ -35,10 +35,10 @@ class MyApp extends StatelessWidget {
               return const Text("Data gagal diambil");
             } else if (snapshot.hasData) {
               final data = snapshot.data!;
-              if (data == true) {
-                return const Home();
-              } else {
+              if (data || data == true) {
                 return const Login();
+              } else {
+                return const Home();
               }
             } else {
               return const Text("Tidak ada data");

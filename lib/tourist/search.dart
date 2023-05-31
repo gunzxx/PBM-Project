@@ -56,10 +56,14 @@ class _SearchState extends State<Search> {
     await _tourists;
   }
 
+  Future<List<dynamic>> _start() async {
+    return [];
+  }
+
   @override
   initState() {
     super.initState();
-    _tourists = _getTourists();
+    _tourists = _start();
   }
 
   @override
@@ -97,7 +101,6 @@ class _SearchState extends State<Search> {
                                   _searchFocusNode.unfocus();
                                   _searchController.text = '';
                                 });
-                                _searchApi();
                               },
                             )
                           : IconButton(

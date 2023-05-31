@@ -11,7 +11,7 @@ import 'package:flutter/material.dart'
         Icon,
         Icons;
 import 'bookmark/index.dart' show BookMark;
-import 'profile/map.dart' show MapGoogle;
+import 'profile/index.dart' show Profile;
 import 'tourist/index.dart' show Tourist;
 
 class Home extends StatefulWidget {
@@ -27,7 +27,7 @@ class _HomeState extends State<Home> {
   final List<Widget> _screens = [
     const Tourist(),
     const BookMark(),
-    MapGoogle(),
+    const Profile(),
   ];
 
   @override
