@@ -10,41 +10,30 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late bool _is_login;
+  @override
+  initState() {
+    super.initState();
+
+    setState(() {
+      authCheck().then((value) => _is_login = value);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: FutureBuilder(
-          future: authCheck(),
-          builder: (BuildContext context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SpinKitCubeGrid(
-                    color: bl1,
-                    size: 50.0,
-                  ),
-                ],
-              );
-            } else if (snapshot.hasError) {
-              return const Text("Data gagal diambil");
-            } else if (snapshot.hasData) {
-              final data = snapshot.data!;
-              if (data == true) {
-                return const Home();
-              } else {
-                return const Login();
-              }
-            } else {
-              return const Text("Tidak ada data");
-            }
-          },
-        ),
+        home: _is_login ? Home() : Login(),
       ),
     );
   }
