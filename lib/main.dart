@@ -18,22 +18,51 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  late bool _is_login;
-  @override
-  initState() {
-    super.initState();
-
-    setState(() {
-      authCheck().then((value) => _is_login = value);
-    });
-  }
+  // @override
+  // initState() {
+  //   super.initState();
+  // }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: _is_login ? Home() : Login(),
+        home: FutureBuilder(
+          future: authCheck(),
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Scaffold(
+                backgroundColor: bl1,
+                body: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SpinKitCubeGrid(
+                          color: b1,
+                          size: 50.0,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            } else if (snapshot.hasError) {
+              return const Text("Data gagal diambil");
+            } else if (snapshot.hasData) {
+              final data = snapshot.data!;
+              if (data == true) {
+                return const Home();
+              } else {
+                return const Login();
+              }
+            } else {
+              return const Text("Tidak ada data");
+            }
+          },
+        ),
       ),
     );
   }
