@@ -6,39 +6,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-// import 'package:flutter/material.dart'
-//     show
-//         StatefulWidget,
-//         State,
-//         Widget,
-//         Scaffold,
-//         FutureBuilder,
-//         BuildContext,
-//         Container,
-//         EdgeInsets,
-//         Icon,
-//         Icons,
-//         Text,
-//         FloatingActionButton,
-//         Center;
-// import 'package:google_maps_flutter/google_maps_flutter.dart'
-//     show
-//         GoogleMapController,
-//         Marker,
-//         GoogleMap,
-//         MapType,
-//         MarkerId,
-//         LatLng,
-//         InfoWindow,
-//         CameraPosition,
-//         CameraUpdate;
-// import 'package:geolocator/geolocator.dart'
-//     show Position, Geolocator, LocationPermission;
-// import 'package:geocoding/geocoding.dart'
-//     show Placemark, placemarkFromCoordinates;
-
 class MapGoogle extends StatefulWidget {
-  MapGoogle({super.key});
+  const MapGoogle({super.key});
 
   @override
   State<MapGoogle> createState() => _MapGoogleState();
@@ -128,7 +97,7 @@ class _MapGoogleState extends State<MapGoogle> {
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Harap aktifkan GPS anda!"),
+                const Text("Harap aktifkan GPS dan internet anda!"),
                 TextButton(
                   onPressed: () {
                     setState(() {
@@ -174,15 +143,15 @@ class _MapGoogleState extends State<MapGoogle> {
           });
     }
 
-    await Geolocator.getCurrentPosition().then((position) {
+    final position = await Geolocator.getCurrentPosition().then((position) {
       setState(() {
         _markers = {};
         _markers.add(Marker(
           markerId: const MarkerId('selected_marker'),
           position: LatLng(position.latitude, position.longitude),
           infoWindow: const InfoWindow(
-            title: 'Lake Marker',
-            snippet: 'Ini adalah penanda di danau',
+            title: 'Posisi saat ini',
+            snippet: 'Ini adalah posisi anda sekarang',
           ),
         ));
       });

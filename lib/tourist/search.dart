@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http show get;
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
 
 import '../mylib/color.dart';
+import 'detail_tourist_page.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -155,13 +156,13 @@ class _SearchState extends State<Search> {
                             ],
                           );
                         } else if (snapshot.hasData) {
-                          final data = snapshot.data!;
-                          return data.isEmpty
+                          final datas = snapshot.data!;
+                          return datas.isEmpty
                               ? const Text("Tidak ada data.")
                               : ListView.builder(
-                                  itemCount: data.length,
+                                  itemCount: datas.length,
                                   itemBuilder: (context, index) {
-                                    final item = data[index];
+                                    final item = datas[index];
                                     final category = item['category'];
                                     return Card(
                                       child: ListTile(
@@ -174,57 +175,12 @@ class _SearchState extends State<Search> {
                                         subtitle: Text(category['name']),
                                         hoverColor: const Color.fromRGBO(
                                             255, 255, 255, .3),
-                                        onTap: () async {
-                                          showDialog(
-                                              context: context,
-                                              builder: (BuildContext context) {
-                                                return AlertDialog(
-                                                  title: Text(item['name']),
-                                                  content: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          Container(
-                                                            margin:
-                                                                const EdgeInsets
-                                                                        .only(
-                                                                    top: 10,
-                                                                    bottom: 10),
-                                                            height: 100,
-                                                            child: Image
-                                                                .network(item[
-                                                                    'thumb']),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Text(
-                                                          "Lokasi : ${item['location']}"),
-                                                      Container(
-                                                        margin: const EdgeInsets
-                                                                .only(
-                                                            top: 10,
-                                                            bottom: 10),
-                                                        child: Text(item[
-                                                            'description']),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  actions: [
-                                                    TextButton(
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: const Text("OK"))
-                                                  ],
-                                                );
-                                              });
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      DetailTouristPage(item)));
                                         },
                                       ),
                                     );

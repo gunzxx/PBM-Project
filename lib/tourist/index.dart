@@ -202,7 +202,16 @@ class _TouristState extends State<Tourist> {
                                                         ? _errorMessageTourist
                                                         : "Data gagal diambil"),
                                                     TextButton(
-                                                        onPressed: _refreshData,
+                                                        onPressed: () {
+                                                          setState(() {
+                                                            _tourists =
+                                                                _getTourists(
+                                                                    category[
+                                                                        'id']);
+                                                            _errorMessageTourist =
+                                                                '';
+                                                          });
+                                                        },
                                                         child: const Text(
                                                             "Ulangi"))
                                                   ],
