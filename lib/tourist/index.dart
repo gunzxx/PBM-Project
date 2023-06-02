@@ -22,6 +22,13 @@ class _TouristState extends State<Tourist> {
   String _errorMessageTourist = '';
   final FocusNode _searchInput = FocusNode();
 
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
+
   Future<List<dynamic>> _getCategories(
       {String url = 'https://paa.gunzxx.my.id/api/category'}) async {
     try {
@@ -73,7 +80,12 @@ class _TouristState extends State<Tourist> {
   }
 
   @override
-  initState() {
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  void initState() {
     super.initState();
     _categories = _getCategories();
   }
@@ -94,42 +106,42 @@ class _TouristState extends State<Tourist> {
             style: TextStyle(color: b1),
           ),
         ),
-        body: Center(
-          child: Container(
-            padding: const EdgeInsets.all(15),
-            child: Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(top: 5, bottom: 30),
-                  child: TextField(
-                    focusNode: _searchInput,
-                    onTap: () {
-                      _searchInput.unfocus();
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const Search()));
-                    },
-                    enableInteractiveSelection: false,
-                    textInputAction: TextInputAction.search,
-                    decoration: const InputDecoration(
-                      hintText: 'Cari...',
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.search),
-                        onPressed: null,
+        body: RefreshIndicator(
+          onRefresh: () {
+            setState(() {
+              _categories = _getCategories();
+              _errorMessage = '';
+            });
+            return _categories;
+          },
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(15),
+              child: Column(
+                children: [
+                  Container(
+                    margin: const EdgeInsets.only(top: 5, bottom: 30),
+                    child: TextField(
+                      focusNode: _searchInput,
+                      onTap: () {
+                        _searchInput.unfocus();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const Search()));
+                      },
+                      enableInteractiveSelection: false,
+                      textInputAction: TextInputAction.search,
+                      decoration: const InputDecoration(
+                        hintText: 'Cari...',
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.search),
+                          onPressed: null,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: RefreshIndicator(
-                    onRefresh: () {
-                      setState(() {
-                        _categories = _getCategories();
-                        _errorMessage = '';
-                      });
-                      return _categories;
-                    },
+                  Expanded(
                     child: FutureBuilder<List<dynamic>>(
                       future: _categories,
                       builder: (context, snapshot) {
@@ -349,8 +361,8 @@ class _TouristState extends State<Tourist> {
                       },
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

@@ -24,6 +24,14 @@ class _TouristMapState extends State<TouristMap> {
   final Completer<GoogleMapController> _mapCompleter =
       Completer<GoogleMapController>();
   bool _locationActive = false;
+  Set<Marker> _markers = {};
+
+  @override
+  void setState(fn) {
+    if (mounted) {
+      super.setState(fn);
+    }
+  }
 
   Future<Map> _getCurrentLocation() async {
     bool serviceEnabled;
@@ -53,22 +61,26 @@ class _TouristMapState extends State<TouristMap> {
 
     http.Response response = await http.get(Uri.parse(apiUrl));
 
-    setState(() {
-      _locationActive = true;
-    });
-    if (response.statusCode == 200) {
-      final markers = {
-        Marker(
-          markerId: MarkerId(_tourist['name']),
-          position: LatLng(double.parse(_tourist['latitude']),
-              double.parse(_tourist['longitude'])),
-          infoWindow: InfoWindow(
-            title: _tourist['name'],
-            snippet: strLimit(_tourist['location'], 25),
-          ),
+    final markers = {
+      Marker(
+        markerId: MarkerId(_tourist['name']),
+        position: LatLng(double.parse(_tourist['latitude']),
+            double.parse(_tourist['longitude'])),
+        infoWindow: InfoWindow(
+          title: _tourist['name'],
+          snippet: strLimit(_tourist['location'], 25),
         ),
-      };
+      ),
+    };
+    setState(() {
+      _markers = markers;
+    });
+
+    Set<Polyline> polylines = {};
+
+    if (response.statusCode == 200) {
       setState(() {
+        _locationActive = true;
         markers.add(Marker(
           markerId: const MarkerId('selected_marker'),
           icon:
@@ -79,29 +91,60 @@ class _TouristMapState extends State<TouristMap> {
             snippet: 'Ini adalah posisi anda sekarang',
           ),
         ));
+        _markers = markers;
       });
       Map<String, dynamic> decodedJson = jsonDecode(response.body);
-      print(decodedJson);
-      List<dynamic> coordinates =
-          decodedJson['features'][0]['geometry']['coordinates'];
 
-      List<LatLng> points = [];
-      for (var coordinate in coordinates) {
-        double longitude = coordinate[0];
-        double latitude = coordinate[1];
-        points.add(LatLng(latitude, longitude));
-      }
+      List<dynamic> features = decodedJson['features'];
 
-      return {
-        "markers": markers,
-        "polylines": <Polyline>{
-          Polyline(
+      for (var i = 0; i < features.length; i++) {
+        final coordinates = features[i]['geometry']['coordinates'];
+        print(features[i]);
+
+        List<LatLng> points = [];
+        for (var coordinate in coordinates) {
+          double longitude = coordinate[0];
+          double latitude = coordinate[1];
+          points.add(LatLng(latitude, longitude));
+        }
+        setState(() {
+          polylines.add(Polyline(
             polylineId: PolylineId('route'),
             color: Colors.blue,
             width: 5,
             points: points,
-          )
-        }
+          ));
+        });
+      }
+
+      return {
+        "markers": markers,
+        "polylines": polylines,
+      };
+    }
+    if (response.statusCode == 404) {
+      setState(() {
+        _locationActive = true;
+        _markers = markers;
+      });
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Rute tidak ditemukan."),
+              content: Text("Tidak ada rute yang mengarah ke tempat tersebut."),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text("Oke"))
+              ],
+            );
+          });
+      return {
+        "markers": markers,
+        "polylines": <Polyline>{},
       };
     }
     return {
@@ -148,7 +191,7 @@ class _TouristMapState extends State<TouristMap> {
                       double.parse(_tourist['longitude'])),
                   zoom: 14.4746,
                 ),
-                markers: datas['markers'],
+                markers: _markers,
                 onMapCreated: (GoogleMapController controller) {
                   _mapCompleter.complete(controller);
                 },
@@ -197,10 +240,23 @@ class _TouristMapState extends State<TouristMap> {
 
     final position = await Geolocator.getCurrentPosition();
 
+    setState(() {
+      _locationActive = true;
+      _markers.add(Marker(
+        markerId: const MarkerId('selected_marker'),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+        position: LatLng(position.latitude, position.longitude),
+        infoWindow: const InfoWindow(
+          title: 'Posisi saat ini',
+          snippet: 'Ini adalah posisi anda sekarang',
+        ),
+      ));
+    });
+
     _mapCompleter.future.then((controller) {
       controller.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target: LatLng(position.latitude, position.longitude),
-        zoom: 20,
+        zoom: 15,
       )));
     });
   }

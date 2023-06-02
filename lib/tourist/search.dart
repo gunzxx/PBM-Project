@@ -62,6 +62,11 @@ class _SearchState extends State<Search> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   initState() {
     super.initState();
     _tourists = _start();
