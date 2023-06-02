@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
 
 import 'auth/login.dart';
@@ -7,6 +8,8 @@ import 'mylib/auth.dart' show authCheck;
 import 'mylib/color.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   runApp(const MyApp());
 }
 
@@ -18,11 +21,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // @override
-  // initState() {
-  //   super.initState();
-  // }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -32,9 +30,9 @@ class _MyAppState extends State<MyApp> {
           future: authCheck(),
           builder: (BuildContext context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Scaffold(
+              return const Scaffold(
                 backgroundColor: bl1,
-                body: const Column(
+                body: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Row(

@@ -128,14 +128,14 @@ class _MapGoogleState extends State<MapGoogle> {
                 child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("Harap aktifkan GPS anda!"),
+                const Text("Harap aktifkan GPS anda!"),
                 TextButton(
                   onPressed: () {
                     setState(() {
                       _getLocation = _setPosisiAwal();
                     });
                   },
-                  child: Text("Ulangi"),
+                  child: const Text("Ulangi"),
                 ),
               ],
             ));
@@ -144,10 +144,10 @@ class _MapGoogleState extends State<MapGoogle> {
       ),
       floatingActionButton: _locationActive == true
           ? Container(
-              margin: EdgeInsets.only(right: 50, bottom: 50),
+              margin: const EdgeInsets.only(right: 50, bottom: 50),
               child: FloatingActionButton(
                 onPressed: _goCurrentPosisition,
-                child: Icon(Icons.location_on_outlined),
+                child: const Icon(Icons.location_on_outlined),
               ),
             )
           : null,
@@ -167,7 +167,7 @@ class _MapGoogleState extends State<MapGoogle> {
       return showDialog(
           context: context,
           builder: (context) {
-            return AlertDialog(
+            return const AlertDialog(
               title: Text("GPS atau Internet tidak aktif"),
               content: Text("Harap aktifkan koneksi GPS anda, lalu coba lagi!"),
             );
@@ -178,9 +178,9 @@ class _MapGoogleState extends State<MapGoogle> {
       setState(() {
         _markers = {};
         _markers.add(Marker(
-          markerId: MarkerId('selected_marker'),
+          markerId: const MarkerId('selected_marker'),
           position: LatLng(position.latitude, position.longitude),
-          infoWindow: InfoWindow(
+          infoWindow: const InfoWindow(
             title: 'Lake Marker',
             snippet: 'Ini adalah penanda di danau',
           ),
@@ -202,7 +202,7 @@ class _MapGoogleState extends State<MapGoogle> {
       return showDialog(
           context: context,
           builder: (context) {
-            return AlertDialog(
+            return const AlertDialog(
               title: Text("GPS tidak aktif"),
               content: Text("Harap aktifkan GPS anda, lalu coba lagi!"),
             );
@@ -214,7 +214,7 @@ class _MapGoogleState extends State<MapGoogle> {
       return showDialog(
           context: context,
           builder: (context) {
-            return AlertDialog(
+            return const AlertDialog(
               title: Text("Internet tidak aktif"),
               content:
                   Text("Harap aktifkan koneksi internet anda, lalu coba lagi!"),

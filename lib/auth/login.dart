@@ -7,7 +7,7 @@ import '../home.dart';
 import '../mylib/auth.dart';
 import '../mylib/color.dart';
 import '../mylib/jwt.dart';
-import '../style/buttonStyle.dart';
+import '../style/button_style.dart';
 import 'register.dart';
 
 class Login extends StatefulWidget {
@@ -65,7 +65,7 @@ class _LoginState extends State<Login> {
                       fit: FlexFit.tight,
                       child: Container(
                         alignment: Alignment.center,
-                        margin: EdgeInsets.symmetric(horizontal: 30),
+                        margin: const EdgeInsets.symmetric(horizontal: 30),
                         child: Form(
                           key: _formKey,
                           child: Column(
@@ -74,7 +74,7 @@ class _LoginState extends State<Login> {
                               TextFormField(
                                 keyboardType: TextInputType.emailAddress,
                                 controller: _emailController,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   labelText: 'email',
                                 ),
                                 validator: (value) {
@@ -84,7 +84,7 @@ class _LoginState extends State<Login> {
                                   return null;
                                 },
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               TextFormField(
                                 controller: _passwordController,
                                 obscureText: _obscureText ? true : false,
@@ -109,18 +109,18 @@ class _LoginState extends State<Login> {
                                   return null;
                                 },
                               ),
-                              SizedBox(height: 20),
+                              const SizedBox(height: 20),
                               ElevatedButton(
                                 onPressed: _isLoading ? null : _login,
                                 style: button1(),
-                                child: Text('Login'),
+                                child: const Text('Login'),
                               ),
                               Container(
-                                margin: EdgeInsets.only(top: 10),
+                                margin: const EdgeInsets.only(top: 10),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
-                                    Text("Tidak punya akun?"),
+                                    const Text("Tidak punya akun?"),
                                     TextButton(
                                       onPressed: () {
                                         Navigator.pushAndRemoveUntil(
@@ -128,10 +128,10 @@ class _LoginState extends State<Login> {
                                             MaterialPageRoute(
                                                 builder:
                                                     (BuildContext context) =>
-                                                        RegisterPage()),
+                                                        const RegisterPage()),
                                             (route) => false);
                                       },
-                                      child: Text("Daftar"),
+                                      child: const Text("Daftar"),
                                     )
                                   ],
                                 ),
@@ -151,8 +151,8 @@ class _LoginState extends State<Login> {
                 _isLoading
                     ? Expanded(
                         child: Container(
-                          color: Color.fromRGBO(0, 0, 0, .3),
-                          child: Column(
+                          color: const Color.fromRGBO(0, 0, 0, .3),
+                          child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Row(
@@ -203,20 +203,19 @@ class _LoginState extends State<Login> {
           saveToken(jsonDecode(response.body)['message']);
           setLogin();
         });
-        await showDialog(
+        return await showDialog(
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: Text("Login berhasil"),
+              content: const Text("Login berhasil"),
               actions: <Widget>[
                 TextButton(
-                  child: Text('OK'),
+                  child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => Home()),
+                      MaterialPageRoute(builder: (context) => const Home()),
                       (route) => false,
                     );
                   },
@@ -227,7 +226,7 @@ class _LoginState extends State<Login> {
         ).then((value) {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (BuildContext context) => Home()),
+            MaterialPageRoute(builder: (BuildContext context) => const Home()),
             (route) => false,
           );
         });
@@ -239,7 +238,7 @@ class _LoginState extends State<Login> {
               content: Text(jsonDecode(response.body)['message']),
               actions: <Widget>[
                 TextButton(
-                  child: Text('OK'),
+                  child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },

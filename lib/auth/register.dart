@@ -7,7 +7,7 @@ import 'package:pariwisata_jember/auth/login.dart';
 import 'package:http/http.dart' as http;
 
 import '../mylib/color.dart';
-import '../style/buttonStyle.dart';
+import '../style/button_style.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -49,7 +49,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Stack(
               children: [
                 Container(
-                  margin: EdgeInsets.symmetric(horizontal: 30),
+                  margin: const EdgeInsets.symmetric(horizontal: 30),
                   child: Column(
                     children: [
                       Flexible(
@@ -71,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
                             children: [
                               TextFormField(
                                 controller: _usernameController,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   label: Text("username"),
                                 ),
                                 validator: (value) {
@@ -84,7 +84,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               TextFormField(
                                 keyboardType: TextInputType.emailAddress,
                                 controller: _emailController,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   label: Text("email"),
                                 ),
                                 validator: (value) {
@@ -96,7 +96,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               ),
                               TextFormField(
                                 controller: _addressController,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   label: Text("Alamat"),
                                 ),
                                 validator: (value) {
@@ -109,7 +109,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               TextFormField(
                                 controller: _password1Controller,
                                 decoration: InputDecoration(
-                                  label: Text("password"),
+                                  label: const Text("password"),
                                   suffixIcon: InkWell(
                                     onTap: () {
                                       setState(() {
@@ -135,7 +135,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               TextFormField(
                                 controller: _password2Controller,
                                 decoration: InputDecoration(
-                                  label: Text("konfirmasi password"),
+                                  label: const Text("konfirmasi password"),
                                   suffixIcon: InkWell(
                                     onTap: () {
                                       setState(() {
@@ -159,14 +159,14 @@ class _RegisterPageState extends State<RegisterPage> {
                                 },
                               ),
                               Container(
-                                margin: EdgeInsets.only(top: 10),
+                                margin: const EdgeInsets.only(top: 10),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
-                                        Text("Sudah punya akun?"),
+                                        const Text("Sudah punya akun?"),
                                         TextButton(
                                           onPressed: () {
                                             Navigator.pushAndRemoveUntil(
@@ -174,17 +174,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                                 MaterialPageRoute(
                                                     builder: (BuildContext
                                                             context) =>
-                                                        Login()),
+                                                        const Login()),
                                                 (route) => false);
                                           },
-                                          child: Text("Login"),
+                                          child: const Text("Login"),
                                         ),
                                       ],
                                     ),
                                     ElevatedButton(
                                       style: button1(),
                                       onPressed: _isLoading ? null : _register,
-                                      child: Text("Register"),
+                                      child: const Text("Register"),
                                     ),
                                   ],
                                 ),
@@ -199,8 +199,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 _isLoading
                     ? Expanded(
                         child: Container(
-                          color: Color.fromRGBO(0, 0, 0, .3),
-                          child: Column(
+                          color: const Color.fromRGBO(0, 0, 0, .3),
+                          child: const Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Row(
@@ -239,11 +239,12 @@ class _RegisterPageState extends State<RegisterPage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text('Error'),
-              content: Text('Password dan konfirmasi password harus sama.'),
+              title: const Text('Error'),
+              content:
+                  const Text('Password dan konfirmasi password harus sama.'),
               actions: <Widget>[
                 TextButton(
-                  child: Text('OK'),
+                  child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -262,7 +263,7 @@ class _RegisterPageState extends State<RegisterPage> {
         return showDialog(
           context: context,
           builder: (context) {
-            return AlertDialog(
+            return const AlertDialog(
               content: Text("Lokasi tidak aktif"),
             );
           },
@@ -280,7 +281,7 @@ class _RegisterPageState extends State<RegisterPage> {
           return showDialog(
             context: context,
             builder: (context) {
-              return AlertDialog(
+              return const AlertDialog(
                 content: Text("Lokasi tidak diizinkan"),
               );
             },
@@ -316,24 +317,25 @@ class _RegisterPageState extends State<RegisterPage> {
             return AlertDialog(
               content: jsonDecode(response.body)['message'] != null
                   ? Text(jsonDecode(response.body)['message'])
-                  : Text("Register berhasil!"),
+                  : const Text("Register berhasil!"),
               actions: [
                 TextButton(
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
-                              builder: (BuildContext context) => Login()),
+                              builder: (BuildContext context) => const Login()),
                           (route) => false);
                     },
-                    child: Text("Oke"))
+                    child: const Text("Oke"))
               ],
             );
           },
         ).then((_) {
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (BuildContext context) => Login()),
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const Login()),
               (route) => false);
         });
       } else {
@@ -346,7 +348,7 @@ class _RegisterPageState extends State<RegisterPage> {
             return AlertDialog(
               content: jsonDecode(response.body)['message'] != null
                   ? Text(jsonDecode(response.body)['message'])
-                  : Text("Register gagal!"),
+                  : const Text("Register gagal!"),
             );
           },
         );

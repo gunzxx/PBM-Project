@@ -15,6 +15,7 @@ class _BookMarkState extends State<BookMark> {
     return Scaffold(
       backgroundColor: w1,
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: bl1,
         title: const Text(
           "Penanda",

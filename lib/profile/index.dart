@@ -12,6 +12,7 @@ class Profile extends StatelessWidget {
     return Scaffold(
       backgroundColor: w1,
       appBar: AppBar(
+        elevation: 0,
         backgroundColor: bl1,
         title: const Text(
           "Profile",
@@ -23,10 +24,10 @@ class Profile extends StatelessWidget {
           Navigator.pushAndRemoveUntil(context,
               MaterialPageRoute(builder: (BuildContext context) {
             setLogout();
-            return Login();
+            return const Login();
           }), (route) => false);
         },
-        child: Text("Logout"),
+        child: const Text("Logout"),
       ),
     );
   }

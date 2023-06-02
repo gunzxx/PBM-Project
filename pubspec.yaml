@@ -36,7 +36,8 @@ dependencies:
   geolocator: ^7.1.1
   geocoding: ^2.1.0
   connectivity_plus: ^4.0.1
-  flutter_launcher_icons: "^0.13.1"
+  flutter_launcher_icons: ^0.13.1
+  flutter_swiper_plus: ^2.0.4
   shared_preferences: ^2.1.1
   # flutter_secure_storage: ^8.0.0
 
