@@ -2,6 +2,9 @@ import 'dart:convert' show jsonDecode;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http show get;
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
+import '../model/bookmark_model.dart';
+import '../state/home_category_state.dart';
+import 'package:provider/provider.dart';
 
 import '../mylib/color.dart';
 import '../mylib/string.dart';
@@ -18,7 +21,6 @@ class Tourist extends StatefulWidget {
 class _TouristState extends State<Tourist> {
   late Future<List<dynamic>> _categories;
   late Future<List<dynamic>> _tourists;
-  String _errorMessage = '';
   String _errorMessageTourist = '';
   final FocusNode _searchInput = FocusNode();
 
@@ -26,27 +28,6 @@ class _TouristState extends State<Tourist> {
   void setState(fn) {
     if (mounted) {
       super.setState(fn);
-    }
-  }
-
-  Future<List<dynamic>> _getCategories(
-      {String url = 'https://paa.gunzxx.my.id/api/category'}) async {
-    try {
-      final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 30));
-      if (response.statusCode == 200) {
-        return jsonDecode(response.body)['data'];
-      } else {
-        setState(() {
-          _errorMessage = "Gagal mengambil data.";
-        });
-        return [];
-      }
-    } catch (_) {
-      setState(() {
-        _errorMessage = "Terjadi kesalahan.";
-      });
-      return [];
     }
   }
 
@@ -71,14 +52,6 @@ class _TouristState extends State<Tourist> {
     }
   }
 
-  Future<void> _refreshData() async {
-    setState(() {
-      _categories = _getCategories();
-      _errorMessage = '';
-    });
-    await _categories;
-  }
-
   @override
   void dispose() {
     super.dispose();
@@ -87,11 +60,12 @@ class _TouristState extends State<Tourist> {
   @override
   void initState() {
     super.initState();
-    _categories = _getCategories();
   }
 
   @override
   Widget build(BuildContext context) {
+    final homeCategoryState = Provider.of<HomeCategoryState>(context);
+    _categories = homeCategoryState.getData();
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).unfocus();
@@ -107,12 +81,10 @@ class _TouristState extends State<Tourist> {
           ),
         ),
         body: RefreshIndicator(
-          onRefresh: () {
+          onRefresh: () async {
             setState(() {
-              _categories = _getCategories();
-              _errorMessage = '';
+              _categories = homeCategoryState.refreshData();
             });
-            return _categories;
           },
           child: Center(
             child: Container(
@@ -126,9 +98,11 @@ class _TouristState extends State<Tourist> {
                       onTap: () {
                         _searchInput.unfocus();
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const Search()));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Search(),
+                          ),
+                        );
                       },
                       enableInteractiveSelection: false,
                       textInputAction: TextInputAction.search,
@@ -156,17 +130,13 @@ class _TouristState extends State<Tourist> {
                               ),
                             ],
                           );
-                        } else if (snapshot.hasError ||
-                            _errorMessage.isNotEmpty) {
+                        } else if (snapshot.hasError) {
                           return Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(_errorMessage.isNotEmpty
-                                  ? _errorMessage
-                                  : "Data gagal diambil"),
+                              Text(snapshot.error.toString()),
                               TextButton(
-                                  onPressed: _refreshData,
-                                  child: const Text("Ulangi"))
+                                  onPressed: () {}, child: const Text("Ulangi"))
                             ],
                           );
                         } else if (snapshot.hasData) {
@@ -177,11 +147,11 @@ class _TouristState extends State<Tourist> {
                                   itemCount: categories.length,
                                   itemBuilder: (context, index) {
                                     final category = categories[index];
-                                    _tourists = _getTourists(category['id']);
+                                    _tourists = _getTourists(category.id);
                                     return Column(
                                       children: [
                                         Text(
-                                          category['name'].toString(),
+                                          category.name.toString(),
                                           style: const TextStyle(
                                               fontSize: 16,
                                               fontWeight: FontWeight.bold),
@@ -238,16 +208,42 @@ class _TouristState extends State<Tourist> {
                                                       .symmetric(vertical: 10),
                                                   itemBuilder:
                                                       (context, index) {
-                                                    final tourist =
-                                                        tourists[index];
+                                                    final BookmarkModel
+                                                        tourist = BookmarkModel(
+                                                      id: tourists[index]['id'],
+                                                      name: tourists[index]
+                                                          ['name'],
+                                                      description:
+                                                          tourists[index]
+                                                              ['description'],
+                                                      location: tourists[index]
+                                                          ['location'],
+                                                      latitude: tourists[index]
+                                                          ['latitude'],
+                                                      longitude: tourists[index]
+                                                          ['longitude'],
+                                                      thumb: tourists[index]
+                                                          ['thumb'],
+                                                      previewUrl: jsonDecode(
+                                                          tourists[index]
+                                                              ['preview_url']),
+                                                    );
                                                     return GestureDetector(
                                                       onTap: () {
                                                         Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder: (context) =>
-                                                                    DetailTouristPage(
-                                                                        tourist)));
+                                                          context,
+                                                          PageRouteBuilder(
+                                                            pageBuilder: (_, __,
+                                                                    ___) =>
+                                                                DetailTouristPage(
+                                                                    tourist),
+                                                            transitionsBuilder: (_,
+                                                                    a, __, c) =>
+                                                                FadeTransition(
+                                                                    opacity: a,
+                                                                    child: c),
+                                                          ),
+                                                        );
                                                       },
                                                       child: Container(
                                                         margin: const EdgeInsets
@@ -286,10 +282,8 @@ class _TouristState extends State<Tourist> {
                                                                             5),
                                                                 child: Image
                                                                     .network(
-                                                                  tourist[
-                                                                      'thumb'],
-                                                                  fit: tourist[
-                                                                              'thumb'] !=
+                                                                  tourist.thumb,
+                                                                  fit: tourist.thumb !=
                                                                           "https://paa.gunzxx.my.id/img/tourist/default.png"
                                                                       ? BoxFit
                                                                           .cover
@@ -319,7 +313,7 @@ class _TouristState extends State<Tourist> {
                                                             const SizedBox(
                                                                 height: 5),
                                                             Text(
-                                                              tourist['name'],
+                                                              tourist.name,
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,
@@ -328,8 +322,8 @@ class _TouristState extends State<Tourist> {
                                                                 height: 5),
                                                             Text(
                                                                 strLimit(
-                                                                    tourist[
-                                                                        'description'],
+                                                                    tourist
+                                                                        .description,
                                                                     15),
                                                                 textAlign:
                                                                     TextAlign

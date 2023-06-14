@@ -1,16 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
+import 'package:provider/provider.dart';
 
 import 'auth/login.dart';
 import 'home.dart';
 import 'mylib/auth.dart' show authCheck;
 import 'mylib/color.dart';
+import 'state/bookmark_state.dart';
+import 'state/home_category_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => BookmarkState()),
+        ChangeNotifierProvider(create: (_) => HomeCategoryState()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -31,7 +42,7 @@ class _MyAppState extends State<MyApp> {
           builder: (BuildContext context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
-                backgroundColor: bl1,
+                backgroundColor: w1,
                 body: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -39,7 +50,7 @@ class _MyAppState extends State<MyApp> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SpinKitCubeGrid(
-                          color: b1,
+                          color: bl1,
                           size: 50.0,
                         ),
                       ],

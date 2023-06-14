@@ -82,7 +82,10 @@ class _MapGoogleState extends State<MapGoogle> {
 
             return GoogleMap(
               mapType: MapType.normal,
-              initialCameraPosition: _kGooglePlex(latitude, longitude),
+              initialCameraPosition: CameraPosition(
+                target: LatLng(latitude, longitude),
+                zoom: 15,
+              ),
               markers: _markers,
               onMapCreated: (GoogleMapController controller) {
                 setState(() {
@@ -123,12 +126,12 @@ class _MapGoogleState extends State<MapGoogle> {
     );
   }
 
-  CameraPosition _kGooglePlex(double latitude, double longitude) {
-    return CameraPosition(
-      target: LatLng(latitude, longitude),
-      zoom: 14.4746,
-    );
-  }
+  // CameraPosition _kGooglePlex(double latitude, double longitude) {
+  //   return CameraPosition(
+  //     target: LatLng(latitude, longitude),
+  //     zoom: 14.4746,
+  //   );
+  // }
 
   _goCurrentPosisition() async {
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -143,7 +146,7 @@ class _MapGoogleState extends State<MapGoogle> {
           });
     }
 
-    final position = await Geolocator.getCurrentPosition().then((position) {
+    await Geolocator.getCurrentPosition().then((position) {
       setState(() {
         _markers = {};
         _markers.add(Marker(

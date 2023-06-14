@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:pariwisata_jember/auth/login.dart';
+import '../auth/login.dart';
 import 'package:http/http.dart' as http;
 
 import '../mylib/color.dart';

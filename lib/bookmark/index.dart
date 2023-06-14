@@ -1,10 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../mylib/bookmark.dart';
+import '../state/bookmark_state.dart';
+import 'package:provider/provider.dart';
+
+import '../model/bookmark_model.dart';
 import '../mylib/color.dart';
-import '../mylib/string.dart';
 import '../tourist/detail_tourist_page.dart';
 
 class BookMark extends StatefulWidget {
@@ -15,17 +16,18 @@ class BookMark extends StatefulWidget {
 }
 
 class _BookMarkState extends State<BookMark> {
-  late Future _bookmarks;
-  bool _onLoading = false;
+  // Future<List<BookmarkModel>>? _touristFuture;
+  // List<BookmarkModel> _tourists = [];
 
   @override
   initState() {
     super.initState();
-    _bookmarks = getBookmark();
   }
 
   @override
   Widget build(BuildContext context) {
+    final bookmarkState = Provider.of<BookmarkState>(context);
+    // _touristFuture = bookmarkState.getData();
     return Scaffold(
       backgroundColor: w1,
       appBar: AppBar(
@@ -36,27 +38,16 @@ class _BookMarkState extends State<BookMark> {
           style: TextStyle(color: b1),
         ),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            _bookmarks = getBookmark();
-          });
-          await _bookmarks;
-        },
+      body: Center(
         child: FutureBuilder(
-          future: _bookmarks,
+          future: bookmarkState.getBookmarksShared(),
           builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return const Center(
-                child: Text("Terjadi kesalahan."),
-              );
-            } else if (snapshot.hasData) {
-              final tourists = jsonDecode(snapshot.data!);
-              _onLoading = false;
+            if (snapshot.hasData) {
+              final List<BookmarkModel> _tourists = snapshot.data!;
               return GridView.builder(
-                itemCount: tourists.length,
-                padding: EdgeInsets.all(10),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                itemCount: _tourists.length,
+                padding: const EdgeInsets.all(10),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   childAspectRatio: 1 / 1.2,
                   mainAxisSpacing: 10,
@@ -66,10 +57,14 @@ class _BookMarkState extends State<BookMark> {
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  DetailTouristPage(tourists[index])));
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder: (_, __, ___) =>
+                              DetailTouristPage(_tourists[index]),
+                          transitionsBuilder: (_, a, __, c) =>
+                              FadeTransition(opacity: a, child: c),
+                        ),
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.all(10),
@@ -92,8 +87,8 @@ class _BookMarkState extends State<BookMark> {
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(5),
                                   child: Image.network(
-                                    tourists[index]['thumb'],
-                                    fit: tourists[index]['thumb'] !=
+                                    _tourists[index].thumb,
+                                    fit: _tourists[index].thumb !=
                                             "https://paa.gunzxx.my.id/img/tourist/default.png"
                                         ? BoxFit.cover
                                         : BoxFit.contain,
@@ -119,31 +114,23 @@ class _BookMarkState extends State<BookMark> {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                tourists[index]['name'],
+                                _tourists[index].name,
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 5),
-                              Text(strLimit(tourists[index]['description'], 15),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontSize: 12)),
                             ],
                           ),
                           Positioned(
                             bottom: 0,
                             right: 0,
                             child: IconButton(
-                                onPressed: _onLoading == true
-                                    ? null
-                                    : () async {
-                                        await removeBookmark(
-                                            tourists[index]['id']);
-                                        setState(() {
-                                          _bookmarks = getBookmark();
-                                          _onLoading = true;
-                                        });
-                                      },
+                                onPressed: () async {
+                                  await removeBookmark(_tourists[index].id);
+                                  bookmarkState.bookmarks =
+                                      await getBookmarks();
+                                },
                                 padding: EdgeInsets.zero,
-                                icon: Icon(Icons.delete)),
+                                icon: const Icon(Icons.delete)),
                           ),
                         ],
                       ),
@@ -152,7 +139,12 @@ class _BookMarkState extends State<BookMark> {
                 },
               );
             }
-            return Center(child: Text("OKe"));
+            return Column(children: [
+              SpinKitCubeGrid(
+                color: bl1,
+                size: 50.0,
+              ),
+            ]);
           },
         ),
       ),

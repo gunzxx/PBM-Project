@@ -1,15 +1,17 @@
-import 'dart:convert';
 import 'package:flutter_swiper_plus/flutter_swiper_plus.dart';
 import 'package:flutter/material.dart';
-
-import '../image/full.dart';
 import '../mylib/bookmark.dart';
+import 'package:provider/provider.dart';
+
+import '../components/back_button.dart';
+import '../image/full.dart';
+import '../model/bookmark_model.dart';
 import '../mylib/color.dart';
-import '../mylib/string.dart';
+import '../state/bookmark_state.dart';
 import 'tourist_map.dart';
 
 class DetailTouristPage extends StatefulWidget {
-  final dynamic _tourist;
+  final BookmarkModel _tourist;
   const DetailTouristPage(this._tourist, {super.key});
 
   @override
@@ -17,13 +19,12 @@ class DetailTouristPage extends StatefulWidget {
 }
 
 class _DetailTouristPageState extends State<DetailTouristPage> {
-  final Map _tourist;
-  bool _isBookmark = false;
+  final BookmarkModel _tourist;
   final List<dynamic> _previewUrl = [];
   int _index = 0;
   final url = "https://paa.gunzxx.my.id/img/tourist/default.png";
   final FocusNode _commentNode = FocusNode();
-  TextEditingController _commentController = TextEditingController();
+  final TextEditingController _commentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isCommentValid = false;
 
@@ -38,10 +39,10 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
   @override
   initState() {
     super.initState();
-    final thumb = _tourist['thumb'];
+    final thumb = _tourist.thumb;
     _previewUrl.add(thumb);
 
-    final List preview = jsonDecode(_tourist['preview_url']);
+    final List preview = _tourist.previewUrl;
 
     for (var i = 0; i < preview.length; i++) {
       _previewUrl.add(preview[i]);
@@ -56,14 +57,6 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: bl1,
-        title: Text(
-          strLimit(_tourist['name'], 30),
-          style: const TextStyle(color: b1),
-        ),
-      ),
       body: Center(
         child: Stack(
           children: [
@@ -84,29 +77,31 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                       );
                     },
                     child: SizedBox(
-                      height: 200,
+                      height: 220,
                       child: Swiper(
                         itemBuilder: (context, index) {
                           return AspectRatio(
                             aspectRatio: 16 / 9,
-                            child: Image.network(_previewUrl[index],
-                                fit: _previewUrl[index] == url
-                                    ? BoxFit.contain
-                                    : BoxFit.cover,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                              if (loadingProgress == null) {
-                                return child;
-                              }
-                              return Center(
-                                  child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                              ));
-                            }),
+                            child: Image.network(
+                              _previewUrl[index],
+                              fit: _previewUrl[index] == url
+                                  ? BoxFit.contain
+                                  : BoxFit.cover,
+                              loadingBuilder:
+                                  (context, child, loadingProgress) {
+                                if (loadingProgress == null) {
+                                  return child;
+                                }
+                                return Center(
+                                    child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ));
+                              },
+                            ),
                           );
                         },
                         itemCount: _previewUrl.length,
@@ -129,7 +124,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(_tourist['name'],
+                            Text(_tourist.name,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             Row(
@@ -143,29 +138,28 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                             builder: (context) =>
                                                 TouristMap(_tourist)));
                                   },
-                                  icon: Icon(Icons.map),
+                                  icon: const Icon(Icons.map),
                                 ),
-                                FutureBuilder(
-                                  future: cekBookmark(_tourist['id']),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      _isBookmark = snapshot.data!;
-                                      return IconButton(
-                                        onPressed: _isBookmark
-                                            ? _removeBookmark
-                                            : _addBookmark,
-                                        icon: _isBookmark
-                                            ? const Icon(Icons.bookmark)
-                                            : const Icon(
-                                                Icons.bookmark_outline),
-                                      );
-                                    }
-                                    return IconButton(
-                                      onPressed: null,
-                                      icon: const Icon(Icons.bookmark_outline),
-                                    );
-                                  },
-                                ),
+                                Consumer<BookmarkState>(
+                                    builder: (_, bookmarkNotifier, __) {
+                                  return IconButton(
+                                    onPressed: bookmarkNotifier
+                                            .check(_tourist.id)
+                                        ? () async {
+                                            await removeBookmark(_tourist.id);
+                                            bookmarkNotifier.bookmarks =
+                                                await getBookmarks();
+                                          }
+                                        : () async {
+                                            await addBookmark(_tourist);
+                                            bookmarkNotifier.bookmarks =
+                                                await getBookmarks();
+                                          },
+                                    icon: bookmarkNotifier.check(_tourist.id)
+                                        ? const Icon(Icons.bookmark)
+                                        : const Icon(Icons.bookmark_outline),
+                                  );
+                                }),
                               ],
                             ),
                           ],
@@ -179,24 +173,23 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                   style:
                                       TextStyle(fontWeight: FontWeight.w500)),
                               const SizedBox(height: 5),
-                              Text(_tourist['location']),
+                              Text(_tourist.location),
                             ],
                           ),
                         ),
-                        const Divider(),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
+                        Container(
+                          margin: const EdgeInsets.only(top: 10),
+                          alignment: Alignment.topLeft,
+                          child: ExpansionTile(
+                            childrenPadding: const EdgeInsets.only(bottom: 10),
+                            initiallyExpanded: true,
+                            expandedAlignment: Alignment.centerLeft,
+                            title: const Text("Deskripsi : ",
+                                textAlign: TextAlign.left,
+                                style: TextStyle(fontWeight: FontWeight.w500)),
                             children: [
-                              const Text("Deskripsi : ",
-                                  textAlign: TextAlign.left,
-                                  style:
-                                      TextStyle(fontWeight: FontWeight.w500)),
-                              const SizedBox(height: 5),
                               Text(
-                                _tourist['description'],
+                                _tourist.description,
                                 textAlign: TextAlign.left,
                               ),
                             ],
@@ -205,7 +198,6 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                       ],
                     ),
                   ),
-                  Divider(),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 15.0),
                     child: Column(
@@ -214,10 +206,10 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                             onPressed: () {
                               print("OKE");
                             },
-                            child: Text("Ulasan (45)",
+                            child: const Text("Ulasan (45)",
                                 style: TextStyle(fontWeight: FontWeight.bold))),
-                        SizedBox(height: 15),
-                        Align(
+                        const SizedBox(height: 15),
+                        const Align(
                           alignment: Alignment.centerLeft,
                           child: Column(
                             children: [
@@ -255,7 +247,8 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
               left: 0,
               right: 0,
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 color: w1,
                 alignment: Alignment.center,
                 child: Column(
@@ -263,7 +256,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                     Form(
                       key: _formKey,
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(24.0),
@@ -274,7 +267,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                               child: TextFormField(
                                 controller: _commentController,
                                 focusNode: _commentNode,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   hintText: 'Tambahkan ulasan...',
                                   border: InputBorder.none,
                                 ),
@@ -286,7 +279,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                               ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.send),
+                              icon: const Icon(Icons.send),
                               onPressed: _isCommentValid ? _sendComment : null,
                             ),
                           ],
@@ -297,26 +290,27 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                 ),
               ),
             ),
+            tombolKembali(context),
           ],
         ),
       ),
     );
   }
 
-  void _addBookmark() async {
-    await addBookmark(_tourist);
-    setState(() {
-      _isBookmark = true;
-    });
-  }
+  // void _addBookmark() async {
+  //   await addBookmark(_tourist);
+  //   setState(() {
+  //     _isBookmark = true;
+  //   });
+  // }
 
-  void _removeBookmark() async {
-    await removeBookmark(_tourist['id'].runtimeType == int
-        ? _tourist['id']
-        : int.parse(_tourist['id']));
+  // void _removeBookmark() async {
+  //   await removeBookmark(_tourist['id'].runtimeType == int
+  //       ? _tourist['id']
+  //       : int.parse(_tourist['id']));
 
-    setState(() {
-      _isBookmark = false;
-    });
-  }
+  //   setState(() {
+  //     _isBookmark = false;
+  //   });
+  // }
 }

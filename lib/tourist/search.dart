@@ -2,6 +2,7 @@ import 'dart:convert' show jsonDecode;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http show get;
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
+import '../model/bookmark_model.dart';
 
 import '../mylib/color.dart';
 import 'detail_tourist_page.dart';
@@ -167,16 +168,26 @@ class _SearchState extends State<Search> {
                               : ListView.builder(
                                   itemCount: datas.length,
                                   itemBuilder: (context, index) {
-                                    final item = datas[index];
-                                    final category = item['category'];
+                                    final BookmarkModel item = BookmarkModel(
+                                      id: datas[index]['id'],
+                                      name: datas[index]['name'],
+                                      description: datas[index]['description'],
+                                      location: datas[index]['location'],
+                                      latitude: datas[index]['latitude'],
+                                      longitude: datas[index]['longitude'],
+                                      thumb: datas[index]['thumb'],
+                                      previewUrl: jsonDecode(
+                                          datas[index]['preview_url']),
+                                    );
+                                    final category = datas[index]['category'];
                                     return Card(
                                       child: ListTile(
                                         leading: SizedBox(
                                           width: 60,
-                                          child: Image.network(item['thumb'],
+                                          child: Image.network(item.thumb,
                                               fit: BoxFit.cover),
                                         ),
-                                        title: Text(item['name']),
+                                        title: Text(item.name),
                                         subtitle: Text(category['name']),
                                         hoverColor: const Color.fromRGBO(
                                             255, 255, 255, .3),

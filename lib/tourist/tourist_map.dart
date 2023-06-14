@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'dart:async';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
@@ -5,12 +6,13 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:pariwisata_jember/mylib/color.dart';
+import '../mylib/color.dart';
 
+import '../model/bookmark_model.dart';
 import '../mylib/string.dart';
 
 class TouristMap extends StatefulWidget {
-  final Map _tourist;
+  final BookmarkModel _tourist;
   const TouristMap(this._tourist, {super.key});
 
   @override
@@ -19,7 +21,7 @@ class TouristMap extends StatefulWidget {
 
 class _TouristMapState extends State<TouristMap> {
   _TouristMapState(this._tourist);
-  final Map _tourist;
+  final BookmarkModel _tourist;
   late Future _location;
   final Completer<GoogleMapController> _mapCompleter =
       Completer<GoogleMapController>();
@@ -33,42 +35,51 @@ class _TouristMapState extends State<TouristMap> {
     }
   }
 
+  @override
+  dispose() {
+    super.dispose();
+  }
+
   Future<Map> _getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      return Future.error('Tidak ada koneksi internet.');
+    }
+
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      return Future.error('Lokasi tidak diaktifkan.');
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
+        return Future.error('Lokasi tidak diizinkan.');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error(
-          'Location permissions are permanently denied, we cannot request permissions.');
+      return Future.error('Lokasi tidak diizinkan secara permanen.');
     }
 
     final Position position = await Geolocator.getCurrentPosition();
     String apiUrl =
-        'https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62481cfa0da9c90142b685ecce880e451d3d&start=${position.longitude},${position.latitude}&end=${_tourist['longitude']},${_tourist['latitude']}';
+        'https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf62481cfa0da9c90142b685ecce880e451d3d&start=${position.longitude},${position.latitude}&end=${_tourist.longitude},${_tourist.latitude}';
 
     http.Response response = await http.get(Uri.parse(apiUrl));
 
     final markers = {
       Marker(
-        markerId: MarkerId(_tourist['name']),
-        position: LatLng(double.parse(_tourist['latitude']),
-            double.parse(_tourist['longitude'])),
+        markerId: MarkerId(_tourist.name),
+        position: LatLng(
+            double.parse(_tourist.latitude), double.parse(_tourist.longitude)),
         infoWindow: InfoWindow(
-          title: _tourist['name'],
-          snippet: strLimit(_tourist['location'], 25),
+          title: _tourist.name,
+          snippet: strLimit(_tourist.location, 25),
         ),
       ),
     };
@@ -93,23 +104,22 @@ class _TouristMapState extends State<TouristMap> {
         ));
         _markers = markers;
       });
-      Map<String, dynamic> decodedJson = jsonDecode(response.body);
+      Map<String, dynamic> decodedJson = await jsonDecode(response.body);
 
-      List<dynamic> features = decodedJson['features'];
+      List<dynamic> features = await decodedJson['features'];
 
       for (var i = 0; i < features.length; i++) {
-        final coordinates = features[i]['geometry']['coordinates'];
-        print(features[i]);
+        final coordinates = await features[i]['geometry']['coordinates'];
 
         List<LatLng> points = [];
         for (var coordinate in coordinates) {
-          double longitude = coordinate[0];
-          double latitude = coordinate[1];
+          double longitude = await coordinate[0];
+          double latitude = await coordinate[1];
           points.add(LatLng(latitude, longitude));
         }
         setState(() {
           polylines.add(Polyline(
-            polylineId: PolylineId('route'),
+            polylineId: const PolylineId('route'),
             color: Colors.blue,
             width: 5,
             points: points,
@@ -131,14 +141,15 @@ class _TouristMapState extends State<TouristMap> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text("Rute tidak ditemukan."),
-              content: Text("Tidak ada rute yang mengarah ke tempat tersebut."),
+              title: const Text("Rute tidak ditemukan."),
+              content: const Text(
+                  "Tidak ada rute yang mengarah ke tempat tersebut."),
               actions: [
                 TextButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text("Oke"))
+                    child: const Text("Oke"))
               ],
             );
           });
@@ -154,11 +165,6 @@ class _TouristMapState extends State<TouristMap> {
   }
 
   @override
-  dispose() {
-    super.dispose();
-  }
-
-  @override
   initState() {
     super.initState();
     setState(() {
@@ -171,10 +177,10 @@ class _TouristMapState extends State<TouristMap> {
     return Scaffold(
       floatingActionButton: _locationActive
           ? Container(
-              margin: EdgeInsets.only(right: 0, bottom: 90),
+              margin: const EdgeInsets.only(right: 0, bottom: 90),
               child: IconButton(
                 onPressed: _getCurrentPosisition,
-                icon: Icon(Icons.place_outlined, color: b1, size: 45),
+                icon: const Icon(Icons.place_outlined, color: b1, size: 45),
               ),
             )
           : null,
@@ -187,8 +193,8 @@ class _TouristMapState extends State<TouristMap> {
               return GoogleMap(
                 mapType: MapType.normal,
                 initialCameraPosition: CameraPosition(
-                  target: LatLng(double.parse(_tourist['latitude']),
-                      double.parse(_tourist['longitude'])),
+                  target: LatLng(double.parse(_tourist.latitude),
+                      double.parse(_tourist.longitude)),
                   zoom: 14.4746,
                 ),
                 markers: _markers,
@@ -199,13 +205,26 @@ class _TouristMapState extends State<TouristMap> {
               );
             } else if (snapshot.hasError) {
               return Center(
-                child: Text(
-                  "Terjadi kesalahan : ${snapshot.error}",
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Terjadi kesalahan : ${snapshot.error}",
+                      textAlign: TextAlign.center,
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _location = _getCurrentLocation();
+                        });
+                      },
+                      child: const Text("Ulangi"),
+                    ),
+                  ],
                 ),
               );
             }
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
