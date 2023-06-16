@@ -236,7 +236,7 @@ class _TouristMapState extends State<TouristMap> {
                   SpinKitThreeBounce(
                     color: Colors.blue,
                     size: 20,
-                  )
+                  ),
                 ],
               ),
             );

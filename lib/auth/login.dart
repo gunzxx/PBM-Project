@@ -199,8 +199,10 @@ class _LoginState extends State<Login> {
       });
 
       if (response.statusCode == 200) {
+        final token = jsonDecode(response.body)['token'];
+        print(token);
         setState(() {
-          saveToken(jsonDecode(response.body)['message']);
+          saveToken(token);
           setLogin();
         });
         return await showDialog(

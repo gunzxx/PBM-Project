@@ -1,48 +1,49 @@
 import 'package:flutter/material.dart';
 
-class CommentInput extends StatelessWidget {
-  final FocusNode _commentNode = FocusNode();
-  final _formKey = GlobalKey<FormState>();
+class CommentWidget extends StatelessWidget {
+  final String username, comment, avatarUrl;
+  final int index;
 
-  void _sendComment() {
-    if (_formKey.currentState!.validate()) {
-      print("OKE");
-    }
-  }
+  const CommentWidget({
+    Key? key,
+    required this.username,
+    required this.comment,
+    required this.avatarUrl,
+    required this.index,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(24.0),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextFormField(
-                focusNode: _commentNode,
-                decoration: InputDecoration(
-                  hintText: 'Tambahkan komentar...',
-                  border: InputBorder.none,
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      color: index % 2 == 1 ? const Color(0xFFF6F6F6) : Colors.white,
+      // constraints: BoxConstraints(minHeight: 40),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            backgroundImage: NetworkImage(avatarUrl),
+            radius: 20.0,
+            backgroundColor: Colors.white,
+          ),
+          SizedBox(width: 8.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  username,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16.0,
+                  ),
                 ),
-                validator: (value) {
-                  if (value!.isEmpty) {
-                    return "Tidak boleh kosong";
-                  }
-                  return null;
-                },
-              ),
+                SizedBox(height: 4.0),
+                Text(comment),
+              ],
             ),
-            IconButton(
-              icon: Icon(Icons.send),
-              onPressed: _sendComment,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

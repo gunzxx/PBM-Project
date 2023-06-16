@@ -1,12 +1,21 @@
+import 'dart:convert';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitThreeBounce;
 import 'package:flutter_swiper_plus/flutter_swiper_plus.dart';
 import 'package:flutter/material.dart';
+import '../auth/login.dart';
+import '../components/comment.dart';
+import '../mylib/auth.dart';
 import '../mylib/bookmark.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import '../components/back_button.dart';
 import '../image/full.dart';
 import '../model/bookmark_model.dart';
 import '../mylib/color.dart';
+import '../mylib/jwt.dart';
 import '../state/bookmark_state.dart';
 import 'tourist_map.dart';
 
@@ -25,14 +34,223 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
   final url = "https://paa.gunzxx.my.id/img/tourist/default.png";
   final FocusNode _commentNode = FocusNode();
   final TextEditingController _commentController = TextEditingController();
+  final FocusNode _editCommentNode = FocusNode();
+  final TextEditingController _editCommentController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isCommentValid = false;
 
+  late Future<List<dynamic>> _futureGetComment;
+
+  _deleteComment(int id) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: BeveledRectangleBorder(),
+            clipBehavior: Clip.hardEdge,
+            content: Text("Hapus ulasan?"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("Tidak")),
+              TextButton(onPressed: () {}, child: Text("Iya")),
+            ],
+          );
+        });
+  }
+
+  _editComment(int id) async {
+    final jwt = await getToken();
+    if (!context.mounted) return;
+    Navigator.pop(context);
+    final response = await http.put(
+      Uri.parse('https://paa.gunzxx.my.id/api/review'),
+      // body: jsonEncode({
+      //   "text": _editCommentController.text,
+      //   "tourist_id": id.toString(),
+      // }),
+      body: {
+        "text": _editCommentController.text,
+        "tourist_id": id.toString(),
+      },
+      headers: {
+        "Authorization": "Bearer $jwt",
+      },
+    );
+    if (response.statusCode == 200) {
+      setState(() {
+        _futureGetComment = _getComment();
+      });
+      if (!context.mounted) return;
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text("Komentar berhasil diedit"),
+            );
+          });
+    }
+
+    if (response.statusCode != 200) {
+      setState(() {
+        _futureGetComment = _getComment();
+      });
+      showDialog(
+          context: context,
+          builder: (context2) {
+            return AlertDialog(
+              content: Text(jsonDecode(response.body)['message']),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context2);
+                    },
+                    child: Text("Oke", style: TextStyle(color: b1)))
+              ],
+            );
+          });
+    }
+  }
+
+  _showCommand(data) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: BeveledRectangleBorder(),
+            clipBehavior: Clip.hardEdge,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _editCommentController.text = data['text'];
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          content: Form(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: TextFormField(
+                                        maxLength: 200,
+                                        controller: _editCommentController,
+                                        focusNode: _editCommentNode,
+                                        decoration: InputDecoration(
+                                          hintText: 'Edit ulasan...',
+                                          border: InputBorder.none,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.send),
+                                      onPressed: () {
+                                        _editCommentNode.unfocus();
+                                        _editComment(data['id']);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: Text('Edit'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _deleteComment(data['id']);
+                  },
+                  child: Text('Hapus'),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  Future<List<dynamic>> _getComment() async {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      return Future.error('Tidak ada koneksi internet.');
+    }
+
+    try {
+      final response = await http.get(
+          Uri.parse('https://paa.gunzxx.my.id/api/tourist/${_tourist.id}'));
+      final data = jsonDecode(response.body)['data']['review'];
+      if (data.isEmpty) {
+        return [];
+      }
+      return data;
+    } on Error catch (_) {
+      return Future.error("error");
+    }
+  }
+
   _DetailTouristPageState(this._tourist);
 
-  void _sendComment() {
+  void _sendComment() async {
+    _commentNode.unfocus();
     if (_isCommentValid) {
-      print(_commentController.text);
+      final jwt = await getToken();
+      final String id = _tourist.id.toString();
+      final response = await http.post(
+        Uri.parse('https://paa.gunzxx.my.id/api/review'),
+        headers: {
+          "Authorization": "Bearer $jwt",
+        },
+        body: {
+          "text": _commentController.text,
+          "tourist_id": id,
+        },
+      );
+
+      _commentController.text = '';
+      if (response.statusCode == 200) {
+        final token = jsonDecode(response.body)['token'];
+        saveToken(token);
+
+        setState(() {
+          _futureGetComment = _getComment();
+        });
+      } else if (response.statusCode == 401) {
+        setState(() {
+          setLogout();
+        });
+        if (!context.mounted) return;
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (_, __, ___) => Login(),
+            transitionsBuilder: (_, a, __, c) =>
+                FadeTransition(opacity: a, child: c),
+          ),
+        );
+      } else {
+        if (!context.mounted) return;
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              content: Text(jsonDecode(response.body)['message']),
+            );
+          },
+        );
+      }
     }
   }
 
@@ -47,6 +265,10 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
     for (var i = 0; i < preview.length; i++) {
       _previewUrl.add(preview[i]);
     }
+
+    setState(() {
+      _futureGetComment = _getComment();
+    });
   }
 
   @override
@@ -64,7 +286,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
               onTap: () {
                 _commentNode.unfocus();
               },
-              child: ListView(
+              child: Column(
                 children: [
                   GestureDetector(
                     onTap: () {
@@ -198,45 +420,64 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                       ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                    child: Column(
-                      children: [
-                        TextButton(
-                            onPressed: () {
-                              print("OKE");
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                      child: Column(
+                        children: [
+                          const Text("Ulasan",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 15),
+                          FutureBuilder<List<dynamic>>(
+                            future: _futureGetComment,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const SpinKitThreeBounce(
+                                  color: Colors.blue,
+                                  size: 20,
+                                );
+                              } else if (snapshot.hasError) {
+                                return Text("Terjadi kesalahan.");
+                              } else if (snapshot.hasData) {
+                                final data = snapshot.data!;
+                                if (data.isEmpty) {
+                                  return const Text("Tidak ada ulasan.");
+                                }
+                                return Expanded(
+                                  child: ListView.builder(
+                                    shrinkWrap: false,
+                                    itemCount: data.length,
+                                    itemBuilder: (context, index) {
+                                      final user = data[index]['user'];
+                                      return GestureDetector(
+                                        onLongPress: () async {
+                                          final String tokenJWT =
+                                              await getToken() ?? '';
+                                          final authUser = parseJwt(tokenJWT);
+                                          if (authUser['id'] != null) {
+                                            if (user['id'] == authUser['id']) {
+                                              _showCommand(data[index]);
+                                            }
+                                          }
+                                        },
+                                        child: CommentWidget(
+                                          username: user['name'],
+                                          comment: data[index]['text'],
+                                          avatarUrl: user['media'][0]
+                                              ['original_url'],
+                                          index: index,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              }
+                              return const Text("Tidak ada ulasan.");
                             },
-                            child: const Text("Ulasan (45)",
-                                style: TextStyle(fontWeight: FontWeight.bold))),
-                        const SizedBox(height: 15),
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Column(
-                            children: [
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                              Text('Halo guys'),
-                            ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -265,6 +506,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                           children: [
                             Expanded(
                               child: TextFormField(
+                                maxLength: 200,
                                 controller: _commentController,
                                 focusNode: _commentNode,
                                 decoration: const InputDecoration(
@@ -296,21 +538,4 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
       ),
     );
   }
-
-  // void _addBookmark() async {
-  //   await addBookmark(_tourist);
-  //   setState(() {
-  //     _isBookmark = true;
-  //   });
-  // }
-
-  // void _removeBookmark() async {
-  //   await removeBookmark(_tourist['id'].runtimeType == int
-  //       ? _tourist['id']
-  //       : int.parse(_tourist['id']));
-
-  //   setState(() {
-  //     _isBookmark = false;
-  //   });
-  // }
 }

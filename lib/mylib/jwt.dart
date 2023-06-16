@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Menyimpan token JWT
@@ -18,22 +19,36 @@ Future<String?> getToken() async {
   }
 }
 
+Map<String, dynamic> parseJwt(String token) {
+  final parts = token.split('.');
+  if (parts.length != 3) {
+    return {};
+  }
 
-// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+  final payload = _decodeBase64(parts[1]);
+  final payloadMap = json.decode(payload);
+  if (payloadMap is! Map<String, dynamic>) {
+    return {};
+  }
 
-// // Menyimpan token JWT
-// Future<void> saveToken(String token) async {
-//   final storage = FlutterSecureStorage();
-//   await storage.write(key: 'jwt_token', value: token);
-// }
+  return payloadMap;
+}
 
-// // Mendapatkan token JWT
-// Future<String?> getToken() async {
-//   final storage = FlutterSecureStorage();
-//   String? token = await storage.read(key: 'jwt_token');
-//   if (token != null) {
-//     return token;
-//   } else {
-//     return "";
-//   }
-// }
+String _decodeBase64(String str) {
+  String output = str.replaceAll('-', '+').replaceAll('_', '/');
+
+  switch (output.length % 4) {
+    case 0:
+      break;
+    case 2:
+      output += '==';
+      break;
+    case 3:
+      output += '=';
+      break;
+    default:
+      return '';
+  }
+
+  return utf8.decode(base64Url.decode(output));
+}
