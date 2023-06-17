@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -7,7 +9,6 @@ import '../home.dart';
 import '../mylib/auth.dart';
 import '../mylib/color.dart';
 import '../mylib/jwt.dart';
-import '../style/button_style.dart';
 import 'register.dart';
 
 class Login extends StatefulWidget {
@@ -41,7 +42,7 @@ class _LoginState extends State<Login> {
         },
         child: Center(
           child: Container(
-            color: bl1,
+            color: bl2,
             child: Stack(
               children: [
                 Column(
@@ -69,82 +70,89 @@ class _LoginState extends State<Login> {
                         child: Form(
                           key: _formKey,
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              TextFormField(
-                                keyboardType: TextInputType.emailAddress,
-                                controller: _emailController,
-                                decoration: const InputDecoration(
-                                  labelText: 'email',
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: w1,
+                                  borderRadius: BorderRadius.circular(10),
                                 ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your email';
-                                  }
-                                  return null;
-                                },
+                                child: TextFormField(
+                                  keyboardType: TextInputType.emailAddress,
+                                  controller: _emailController,
+                                  decoration: _inputDecoration("Email"),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your email';
+                                    }
+                                    return null;
+                                  },
+                                ),
                               ),
                               const SizedBox(height: 20),
-                              TextFormField(
-                                controller: _passwordController,
-                                obscureText: _obscureText ? true : false,
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  suffixIcon: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        _obscureText =
-                                            _obscureText == true ? false : true;
-                                      });
-                                    },
-                                    child: Icon(_obscureText
-                                        ? Icons.visibility_off
-                                        : Icons.visibility),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: w1,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: TextFormField(
+                                  controller: _passwordController,
+                                  obscureText: _obscureText ? true : false,
+                                  decoration: _inputDecoration("Password",
+                                      secure: true),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Please enter your password';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              MaterialButton(
+                                minWidth: 190,
+                                height: 42.0,
+                                color: b1,
+                                elevation: 5,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                onPressed: _isLoading ? null : _login,
+                                child: const Text(
+                                  "Masuk",
+                                  style: TextStyle(
+                                    color: Colors.white,
                                   ),
                                 ),
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Please enter your password';
-                                  }
-                                  return null;
+                              ),
+                              const SizedBox(height: 70),
+                              const Text("Tidak punya akun?"),
+                              const SizedBox(height: 30),
+                              MaterialButton(
+                                minWidth: 190,
+                                height: 42.0,
+                                color: b1,
+                                elevation: 5,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                                onPressed: () {
+                                  Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (BuildContext context) =>
+                                              const RegisterPage()),
+                                      (route) => false);
                                 },
-                              ),
-                              const SizedBox(height: 20),
-                              ElevatedButton(
-                                onPressed: _isLoading ? null : _login,
-                                style: button1(),
-                                child: const Text('Login'),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  children: [
-                                    const Text("Tidak punya akun?"),
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.pushAndRemoveUntil(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder:
-                                                    (BuildContext context) =>
-                                                        const RegisterPage()),
-                                            (route) => false);
-                                      },
-                                      child: const Text("Daftar"),
-                                    )
-                                  ],
+                                child: const Text(
+                                  "Daftar sekarang >>",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                    ),
-                    Flexible(
-                      fit: FlexFit.tight,
-                      flex: 2,
-                      child: Container(),
                     ),
                   ],
                 ),
@@ -200,7 +208,6 @@ class _LoginState extends State<Login> {
 
       if (response.statusCode == 200) {
         final token = jsonDecode(response.body)['token'];
-        print(token);
         setState(() {
           saveToken(token);
           setLogin();
@@ -209,10 +216,20 @@ class _LoginState extends State<Login> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: const Text("Login berhasil"),
-              actions: <Widget>[
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              title: const Icon(
+                Icons.check_circle,
+                size: 64.0,
+                color: Colors.green,
+              ),
+              content: const Text(
+                'Login berhasil.',
+                textAlign: TextAlign.center,
+              ),
+              actions: [
                 TextButton(
-                  child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
                     Navigator.pushAndRemoveUntil(
@@ -221,6 +238,13 @@ class _LoginState extends State<Login> {
                       (route) => false,
                     );
                   },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.green,
+                    ),
+                  ),
                 ),
               ],
             );
@@ -237,13 +261,30 @@ class _LoginState extends State<Login> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: Text(jsonDecode(response.body)['message']),
-              actions: <Widget>[
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              title: const Icon(
+                Icons.error_outline,
+                size: 64.0,
+                color: Colors.red,
+              ),
+              content: const Text(
+                'Login gagal.',
+                textAlign: TextAlign.center,
+              ),
+              actions: [
                 TextButton(
-                  child: const Text('OK'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.green,
+                    ),
+                  ),
                 ),
               ],
             );
@@ -251,5 +292,53 @@ class _LoginState extends State<Login> {
         );
       }
     }
+  }
+
+  InputDecoration _inputDecoration(String text, {bool secure = false}) {
+    return InputDecoration(
+      labelText: text,
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: b1,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: b1,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      fillColor: w1,
+      labelStyle: const TextStyle(
+        color: b1,
+      ),
+      enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(
+            color: b1,
+          ),
+          borderRadius: BorderRadius.circular(10)),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: b1,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      suffixIcon: secure
+          ? InkWell(
+              onTap: () {
+                setState(() {
+                  _obscureText = _obscureText == true ? false : true;
+                });
+              },
+              child: Icon(
+                  _obscureText ? Icons.visibility_off : Icons.visibility,
+                  color: b1),
+            )
+          : null,
+    );
   }
 }

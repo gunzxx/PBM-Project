@@ -3,14 +3,18 @@ import 'package:flutter/material.dart';
 class CommentWidget extends StatelessWidget {
   final String username, comment, avatarUrl;
   final int index;
+  final bool isActive;
+  final Function()? command;
 
-  const CommentWidget({
+  CommentWidget({
     Key? key,
     required this.username,
     required this.comment,
     required this.avatarUrl,
     required this.index,
-  }) : super(key: key);
+    required this.isActive,
+    this.command,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +46,10 @@ class CommentWidget extends StatelessWidget {
                 Text(comment),
               ],
             ),
+          ),
+          InkWell(
+            onTap: command,
+            child: Icon(Icons.more_vert),
           ),
         ],
       ),

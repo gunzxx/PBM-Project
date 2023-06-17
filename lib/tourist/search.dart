@@ -84,7 +84,7 @@ class _SearchState extends State<Search> {
         appBar: AppBar(
           backgroundColor: bl1,
           title: const Text(
-            "Pariwisata Jember",
+            "Cari pariwisata",
             style: TextStyle(color: b1),
           ),
         ),

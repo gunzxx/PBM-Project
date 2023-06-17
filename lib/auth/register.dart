@@ -7,7 +7,6 @@ import '../auth/login.dart';
 import 'package:http/http.dart' as http;
 
 import '../mylib/color.dart';
-import '../style/button_style.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -38,41 +37,43 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: bl1,
+      backgroundColor: bl2,
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
         },
         child: Center(
           child: Container(
-            color: Colors.transparent,
+            color: bl2,
             child: Stack(
               children: [
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Column(
+                  child: ListView(
                     children: [
-                      Flexible(
-                        fit: FlexFit.tight,
-                        flex: 1,
+                      SizedBox(
+                        height: 240,
                         child: Center(
                             child: Image.asset(
                           'assets/logo.png',
                           height: 100,
                         )),
                       ),
-                      Flexible(
-                        fit: FlexFit.tight,
-                        flex: 4,
-                        child: Form(
-                          key: _formKey,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              TextFormField(
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: w1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              child: TextFormField(
                                 controller: _usernameController,
-                                decoration: const InputDecoration(
-                                  label: Text("username"),
+                                decoration: _inputDecoration(
+                                  'Username',
                                 ),
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -81,11 +82,18 @@ class _RegisterPageState extends State<RegisterPage> {
                                   return null;
                                 },
                               ),
-                              TextFormField(
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: w1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              child: TextFormField(
                                 keyboardType: TextInputType.emailAddress,
                                 controller: _emailController,
-                                decoration: const InputDecoration(
-                                  label: Text("email"),
+                                decoration: _inputDecoration(
+                                  'Email',
                                 ),
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -94,10 +102,17 @@ class _RegisterPageState extends State<RegisterPage> {
                                   return null;
                                 },
                               ),
-                              TextFormField(
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: w1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              child: TextFormField(
                                 controller: _addressController,
-                                decoration: const InputDecoration(
-                                  label: Text("Alamat"),
+                                decoration: _inputDecoration(
+                                  'Alamat',
                                 ),
                                 validator: (value) {
                                   if (value!.isEmpty) {
@@ -106,22 +121,20 @@ class _RegisterPageState extends State<RegisterPage> {
                                   return null;
                                 },
                               ),
-                              TextFormField(
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: w1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              child: TextFormField(
                                 controller: _password1Controller,
-                                decoration: InputDecoration(
-                                  label: const Text("password"),
-                                  suffixIcon: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        _obscureText1 = _obscureText1 == true
-                                            ? false
-                                            : true;
-                                      });
-                                    },
-                                    child: Icon(_obscureText1
-                                        ? Icons.visibility_off
-                                        : Icons.visibility),
-                                  ),
+                                decoration: _inputDecoration(
+                                  'Password',
+                                  secure: true,
+                                  iconActive: _obscureText1,
+                                  secureOption: _obsecure1,
                                 ),
                                 obscureText:
                                     _obscureText1 == true ? true : false,
@@ -132,22 +145,20 @@ class _RegisterPageState extends State<RegisterPage> {
                                   return null;
                                 },
                               ),
-                              TextFormField(
+                            ),
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: w1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: TextFormField(
                                 controller: _password2Controller,
-                                decoration: InputDecoration(
-                                  label: const Text("konfirmasi password"),
-                                  suffixIcon: InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        _obscureText2 = _obscureText2 == true
-                                            ? false
-                                            : true;
-                                      });
-                                    },
-                                    child: Icon(_obscureText2
-                                        ? Icons.visibility_off
-                                        : Icons.visibility),
-                                  ),
+                                decoration: _inputDecoration(
+                                  'Konfirmasi Password',
+                                  secure: true,
+                                  iconActive: _obscureText2,
+                                  secureOption: _obsecure2,
                                 ),
                                 obscureText:
                                     _obscureText2 == true ? true : false,
@@ -158,39 +169,57 @@ class _RegisterPageState extends State<RegisterPage> {
                                   return null;
                                 },
                               ),
-                              Container(
-                                margin: const EdgeInsets.only(top: 10),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Text("Sudah punya akun?"),
-                                        TextButton(
-                                          onPressed: () {
-                                            Navigator.pushAndRemoveUntil(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        const Login()),
-                                                (route) => false);
-                                          },
-                                          child: const Text("Login"),
-                                        ),
-                                      ],
+                            ),
+                            Container(
+                              margin: const EdgeInsets.only(top: 10),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  MaterialButton(
+                                    minWidth: 100,
+                                    height: 42.0,
+                                    color: b1,
+                                    elevation: 5,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    onPressed: () {
+                                      Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (BuildContext context) =>
+                                                  const Login()),
+                                          (route) => false);
+                                    },
+                                    child: const Text(
+                                      "Masuk   <<",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                    ElevatedButton(
-                                      style: button1(),
-                                      onPressed: _isLoading ? null : _register,
-                                      child: const Text("Register"),
+                                  ),
+                                  MaterialButton(
+                                    minWidth: 100,
+                                    height: 42.0,
+                                    color: b1,
+                                    elevation: 5,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(10)),
+                                    onPressed: _isLoading ? null : _register,
+                                    child: const Text(
+                                      "Daftar",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 100),
+                          ],
                         ),
                       ),
                     ],
@@ -315,19 +344,33 @@ class _RegisterPageState extends State<RegisterPage> {
           useSafeArea: true,
           builder: (context) {
             return AlertDialog(
-              content: jsonDecode(response.body)['message'] != null
-                  ? Text(jsonDecode(response.body)['message'])
-                  : const Text("Register berhasil!"),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              title: const Icon(
+                Icons.check_circle,
+                size: 64.0,
+                color: Colors.green,
+              ),
+              content: Text(
+                jsonDecode(response.body)['message'] != null
+                    ? jsonDecode(response.body)['message']
+                    : 'Register gagal',
+                textAlign: TextAlign.center,
+              ),
               actions: [
                 TextButton(
-                    onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (BuildContext context) => const Login()),
-                          (route) => false);
-                    },
-                    child: const Text("Oke"))
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
               ],
             );
           },
@@ -346,13 +389,96 @@ class _RegisterPageState extends State<RegisterPage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: jsonDecode(response.body)['message'] != null
-                  ? Text(jsonDecode(response.body)['message'])
-                  : const Text("Register gagal!"),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              title: const Icon(
+                Icons.error_outline,
+                size: 64.0,
+                color: Colors.red,
+              ),
+              content: Text(
+                jsonDecode(response.body)['message'] ?? 'Register gagal',
+                textAlign: TextAlign.center,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              ],
             );
           },
         );
       }
     }
+  }
+
+  InputDecoration _inputDecoration(
+    String text, {
+    bool secure = false,
+    bool iconActive = false,
+    Function()? secureOption,
+  }) {
+    return InputDecoration(
+      labelText: text,
+      errorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: b1,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: b1,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      fillColor: w1,
+      labelStyle: const TextStyle(
+        color: b1,
+      ),
+      enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(
+            color: b1,
+          ),
+          borderRadius: BorderRadius.circular(10)),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: b1,
+          width: 2.0,
+        ),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      suffixIcon: secure
+          ? InkWell(
+              onTap: secureOption,
+              child: Icon(iconActive ? Icons.visibility_off : Icons.visibility,
+                  color: b1),
+            )
+          : null,
+    );
+  }
+
+  _obsecure1() {
+    setState(() {
+      _obscureText1 = _obscureText1 == true ? false : true;
+    });
+  }
+
+  _obsecure2() {
+    setState(() {
+      _obscureText2 = _obscureText2 == true ? false : true;
+    });
   }
 }

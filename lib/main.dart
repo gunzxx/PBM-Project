@@ -9,6 +9,7 @@ import 'mylib/auth.dart' show authCheck;
 import 'mylib/color.dart';
 import 'state/bookmark_state.dart';
 import 'state/home_category_state.dart';
+import 'state/user_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => UserState()),
         ChangeNotifierProvider(create: (_) => BookmarkState()),
         ChangeNotifierProvider(create: (_) => HomeCategoryState()),
       ],

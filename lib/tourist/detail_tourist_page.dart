@@ -5,11 +5,11 @@ import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitThreeBounce;
 import 'package:flutter_swiper_plus/flutter_swiper_plus.dart';
 import 'package:flutter/material.dart';
 import '../auth/login.dart';
-import '../components/comment.dart';
 import '../mylib/auth.dart';
 import '../mylib/bookmark.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import '../state/user_state.dart';
 
 import '../components/back_button.dart';
 import '../image/full.dart';
@@ -18,6 +18,9 @@ import '../mylib/color.dart';
 import '../mylib/jwt.dart';
 import '../state/bookmark_state.dart';
 import 'tourist_map.dart';
+
+// final navigatorKey = GlobalKey<NavigatorState>();
+final navigatorKey = GlobalKey();
 
 class DetailTouristPage extends StatefulWidget {
   final BookmarkModel _tourist;
@@ -55,25 +58,149 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                     Navigator.pop(context);
                   },
                   child: Text("Tidak")),
-              TextButton(onPressed: () {}, child: Text("Iya")),
+              TextButton(
+                  onPressed: () async {
+                    final connectivityResult =
+                        await (Connectivity().checkConnectivity());
+                    if (connectivityResult == ConnectivityResult.none) {
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                      return showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              title: const Icon(
+                                Icons.error_outline,
+                                size: 64.0,
+                                color: Colors.red,
+                              ),
+                              content: Text(
+                                "Kesalahan jaringan.",
+                                textAlign: TextAlign.center,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text(
+                                    'OK',
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          });
+                    }
+
+                    final jwt = await getToken();
+                    final response = await http.delete(
+                      Uri.parse('https://paa.gunzxx.my.id/api/review'),
+                      body: {
+                        "id": id.toString(),
+                      },
+                      headers: {
+                        "Authorization": "Bearer $jwt",
+                      },
+                    );
+                    if (response.statusCode == 200) {
+                      setState(() {
+                        _futureGetComment = _getComment();
+                      });
+                      Navigator.pop(context);
+                      if (!context.mounted) return;
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              title: const Icon(
+                                Icons.check_circle,
+                                size: 64.0,
+                                color: Colors.green,
+                              ),
+                              content: const Text(
+                                'Komentar berhasil dihapus.',
+                                textAlign: TextAlign.center,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text(
+                                    'OK',
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          });
+                    } else {
+                      // Navigator.pop(context);
+                      if (!context.mounted) return;
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              title: const Icon(
+                                Icons.error_outline,
+                                size: 64.0,
+                                color: Colors.red,
+                              ),
+                              content: Text(
+                                jsonDecode(response.body)['message'] ??
+                                    "Data gagal dihapus",
+                                textAlign: TextAlign.center,
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text(
+                                    'OK',
+                                    style: TextStyle(
+                                      fontSize: 16.0,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          });
+                    }
+                  },
+                  child: Text("Iya")),
             ],
           );
         });
   }
 
-  _editComment(int id) async {
+  _editComment(data) async {
     final jwt = await getToken();
     if (!context.mounted) return;
     Navigator.pop(context);
     final response = await http.put(
       Uri.parse('https://paa.gunzxx.my.id/api/review'),
-      // body: jsonEncode({
-      //   "text": _editCommentController.text,
-      //   "tourist_id": id.toString(),
-      // }),
       body: {
+        "id": data['id'].toString(),
         "text": _editCommentController.text,
-        "tourist_id": id.toString(),
+        "tourist_id": data['tourist_id'].toString(),
       },
       headers: {
         "Authorization": "Bearer $jwt",
@@ -88,7 +215,32 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              content: Text("Komentar berhasil diedit"),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              title: const Icon(
+                Icons.check_circle,
+                size: 64.0,
+                color: Colors.green,
+              ),
+              content: const Text(
+                'Komentar berhasil diedit.',
+                textAlign: TextAlign.center,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              ],
             );
           });
     }
@@ -97,18 +249,12 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
       setState(() {
         _futureGetComment = _getComment();
       });
+      if (!context.mounted) return;
       showDialog(
           context: context,
           builder: (context2) {
             return AlertDialog(
               content: Text(jsonDecode(response.body)['message']),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context2);
-                    },
-                    child: Text("Oke", style: TextStyle(color: b1)))
-              ],
             );
           });
     }
@@ -155,7 +301,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                       icon: const Icon(Icons.send),
                                       onPressed: () {
                                         _editCommentNode.unfocus();
-                                        _editComment(data['id']);
+                                        _editComment(data);
                                       },
                                     ),
                                   ],
@@ -278,6 +424,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
 
   @override
   Widget build(BuildContext context) {
+    final authUserState = Provider.of<UserState>(context);
     return Scaffold(
       body: Center(
         child: Stack(
@@ -405,6 +552,10 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                           child: ExpansionTile(
                             childrenPadding: const EdgeInsets.only(bottom: 10),
                             initiallyExpanded: true,
+                            collapsedTextColor: bl1,
+                            collapsedIconColor: bl1,
+                            iconColor: bl1,
+                            textColor: bl1,
                             expandedAlignment: Alignment.centerLeft,
                             title: const Text("Deskripsi : ",
                                 textAlign: TextAlign.left,
@@ -450,6 +601,11 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                     itemCount: data.length,
                                     itemBuilder: (context, index) {
                                       final user = data[index]['user'];
+                                      final avatarUrl = jsonEncode(
+                                                  user['media']) ==
+                                              "[]"
+                                          ? "https://paa.gunzxx.my.id/img/profile/default.png"
+                                          : user['media'][0]['original_url'];
                                       return GestureDetector(
                                         onLongPress: () async {
                                           final String tokenJWT =
@@ -461,12 +617,58 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                             }
                                           }
                                         },
-                                        child: CommentWidget(
-                                          username: user['name'],
-                                          comment: data[index]['text'],
-                                          avatarUrl: user['media'][0]
-                                              ['original_url'],
-                                          index: index,
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          color: index % 2 == 1
+                                              ? const Color(0xFFF6F6F6)
+                                              : Colors.white,
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              CircleAvatar(
+                                                backgroundImage:
+                                                    NetworkImage(avatarUrl),
+                                                radius: 20.0,
+                                                backgroundColor: Colors.white,
+                                              ),
+                                              SizedBox(width: 8.0),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      user['name'],
+                                                      style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16.0,
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 4.0),
+                                                    Text(data[index]['text']),
+                                                  ],
+                                                ),
+                                              ),
+                                              IconButton(
+                                                onPressed: () async {
+                                                  final String tokenJWT =
+                                                      await getToken() ?? '';
+                                                  final authUser =
+                                                      parseJwt(tokenJWT);
+                                                  if (authUser['id'] ==
+                                                      user['id']) {
+                                                    _showCommand(data[index]);
+                                                  }
+                                                },
+                                                icon: const Icon(1 == 2
+                                                    ? Icons.more_vert
+                                                    : null),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       );
                                     },
@@ -480,6 +682,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 110),
                 ],
               ),
             ),
@@ -488,16 +691,18 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
               left: 0,
               right: 0,
               child: Container(
+                height: 110,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                 color: w1,
                 alignment: Alignment.center,
-                child: Column(
+                child: ListView(
                   children: [
                     Form(
                       key: _formKey,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
                           borderRadius: BorderRadius.circular(24.0),

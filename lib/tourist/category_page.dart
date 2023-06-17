@@ -1,44 +1,76 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
+
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import '../mylib/bookmark.dart';
-import '../state/bookmark_state.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
 
 import '../model/bookmark_model.dart';
 import '../mylib/color.dart';
-import '../tourist/detail_tourist_page.dart';
+import 'detail_tourist_page.dart';
 
-class BookMark extends StatefulWidget {
-  const BookMark({super.key});
+class CategoryPage extends StatefulWidget {
+  final CategoryFrame category;
+
+  const CategoryPage({
+    super.key,
+    required this.category,
+  });
 
   @override
-  State<BookMark> createState() => _BookMarkState();
+  State<CategoryPage> createState() => _CategoryPageState(category: category);
 }
 
-class _BookMarkState extends State<BookMark> {
+class _CategoryPageState extends State<CategoryPage> {
+  final CategoryFrame category;
+  late Future<List<BookmarkModel>> _futureGetCategory;
+
+  _CategoryPageState({required this.category});
+
+  Future<List<BookmarkModel>> _getCategory() async {
+    final response = await http
+        .get(Uri.parse("https://paa.gunzxx.my.id/api/category/${category.id}"));
+    if (response.statusCode == 200) {
+      List<BookmarkModel> datas = [];
+      final List tourists = jsonDecode(response.body)['data']['tourist'];
+      for (var i = 0; i < tourists.length; i++) {
+        final tourist = tourists[i];
+        final data = BookmarkModel(
+          id: tourist['id'],
+          name: tourist['name'],
+          description: tourist['description'],
+          latitude: tourist['latitude'],
+          longitude: tourist['longitude'],
+          location: tourist['location'],
+          thumb: tourist['thumb'],
+          previewUrl: jsonDecode(tourist['preview_url']),
+        );
+        datas.add(data);
+      }
+      return datas;
+    }
+    return Future.error('Terjadi kesalahan.');
+  }
+
   @override
   initState() {
     super.initState();
+    _futureGetCategory = _getCategory();
   }
 
   @override
   Widget build(BuildContext context) {
-    final bookmarkState = Provider.of<BookmarkState>(context);
-    // _touristFuture = bookmarkState.getData();
     return Scaffold(
-      backgroundColor: w1,
       appBar: AppBar(
-        elevation: 1,
-        centerTitle: true,
-        backgroundColor: w1,
-        title: const Text(
-          "Penanda",
-          style: TextStyle(color: bl1),
+        elevation: 0,
+        backgroundColor: bl1,
+        title: Text(
+          category.name,
+          style: TextStyle(color: w1),
         ),
       ),
       body: Center(
         child: FutureBuilder(
-          future: bookmarkState.getBookmarksShared(),
+          future: _futureGetCategory,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final List<BookmarkModel> _tourists = snapshot.data!;
@@ -118,34 +150,48 @@ class _BookMarkState extends State<BookMark> {
                               const SizedBox(height: 5),
                             ],
                           ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: IconButton(
-                                onPressed: () async {
-                                  await removeBookmark(_tourists[index].id);
-                                  bookmarkState.bookmarks =
-                                      await getBookmarks();
-                                },
-                                padding: EdgeInsets.zero,
-                                icon: const Icon(Icons.delete)),
-                          ),
+                          // Positioned(
+                          //   bottom: 0,
+                          //   right: 0,
+                          //   child: IconButton(
+                          //       onPressed: () async {
+                          //         await removeBookmark(_tourists[index].id);
+                          //         bookmarkState.bookmarks =
+                          //             await getBookmarks();
+                          //       },
+                          //       padding: EdgeInsets.zero,
+                          //       icon: const Icon(Icons.delete)),
+                          // ),
                         ],
                       ),
                     ),
                   );
                 },
               );
+            } else if (snapshot.hasError) {
+              return Expanded(
+                  child: Column(
+                children: [
+                  Text('Terjadi kesalahan.'),
+                ],
+              ));
             }
-            return Column(children: [
-              SpinKitCubeGrid(
+            return Expanded(
+              child: SpinKitCubeGrid(
                 color: bl1,
                 size: 50.0,
               ),
-            ]);
+            );
           },
         ),
       ),
     );
   }
+}
+
+class CategoryFrame {
+  final String name;
+  final int id;
+
+  CategoryFrame({required this.name, required this.id});
 }

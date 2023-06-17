@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../auth/login.dart';
 import '../mylib/auth.dart';
+import '../mylib/bookmark.dart';
 import '../mylib/color.dart';
 
 class Profile extends StatelessWidget {
@@ -12,15 +13,17 @@ class Profile extends StatelessWidget {
     return Scaffold(
       backgroundColor: w1,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: bl1,
+        elevation: 1,
+        backgroundColor: w1,
         title: const Text(
           "Profile",
-          style: TextStyle(color: b1),
+          style: TextStyle(color: bl1),
         ),
+        centerTitle: true,
       ),
       body: ElevatedButton(
-        onPressed: () {
+        onPressed: () async {
+          await resetBookmarks();
           Navigator.pushAndRemoveUntil(context,
               MaterialPageRoute(builder: (BuildContext context) {
             setLogout();
