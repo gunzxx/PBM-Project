@@ -9,7 +9,6 @@ import '../mylib/auth.dart';
 import '../mylib/bookmark.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
-import '../state/user_state.dart';
 
 import '../components/back_button.dart';
 import '../image/full.dart';
@@ -49,15 +48,15 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            shape: BeveledRectangleBorder(),
+            shape: const BeveledRectangleBorder(),
             clipBehavior: Clip.hardEdge,
-            content: Text("Hapus ulasan?"),
+            content: const Text("Hapus ulasan?"),
             actions: [
               TextButton(
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  child: Text("Tidak")),
+                  child: const Text("Tidak")),
               TextButton(
                   onPressed: () async {
                     final connectivityResult =
@@ -77,7 +76,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                 size: 64.0,
                                 color: Colors.red,
                               ),
-                              content: Text(
+                              content: const Text(
                                 "Kesalahan jaringan.",
                                 textAlign: TextAlign.center,
                               ),
@@ -185,7 +184,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                           });
                     }
                   },
-                  child: Text("Iya")),
+                  child: const Text("Iya")),
             ],
           );
         });
@@ -265,62 +264,88 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            shape: BeveledRectangleBorder(),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            contentPadding: const EdgeInsets.all(0),
             clipBehavior: Clip.hardEdge,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _editCommentController.text = data['text'];
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          content: Form(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: TextFormField(
-                                        maxLength: 200,
-                                        controller: _editCommentController,
-                                        focusNode: _editCommentNode,
-                                        decoration: InputDecoration(
-                                          hintText: 'Edit ulasan...',
-                                          border: InputBorder.none,
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _editCommentController.text = data['text'];
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            content: Form(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          maxLength: 200,
+                                          controller: _editCommentController,
+                                          focusNode: _editCommentNode,
+                                          decoration: const InputDecoration(
+                                            hintText: 'Edit ulasan...',
+                                            border: InputBorder.none,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.send),
-                                      onPressed: () {
-                                        _editCommentNode.unfocus();
-                                        _editComment(data);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                      IconButton(
+                                        icon: const Icon(Icons.send),
+                                        onPressed: () {
+                                          _editCommentNode.unfocus();
+                                          _editComment(data);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                  child: Text('Edit'),
+                          );
+                        },
+                      );
+                    },
+                    child: const Row(
+                      children: [
+                        Icon(Icons.edit, color: bl1),
+                        SizedBox(width: 10),
+                        Text(
+                          'Edit',
+                          style: TextStyle(color: bl1),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _deleteComment(data['id']);
-                  },
-                  child: Text('Hapus'),
+                Container(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _deleteComment(data['id']);
+                    },
+                    child: const Row(
+                      children: [
+                        Icon(Icons.delete, color: bl1),
+                        SizedBox(width: 10),
+                        Text(
+                          'Hapus',
+                          style: TextStyle(color: bl1),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -381,7 +406,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
         Navigator.pushReplacement(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, __, ___) => Login(),
+            pageBuilder: (_, __, ___) => const Login(),
             transitionsBuilder: (_, a, __, c) =>
                 FadeTransition(opacity: a, child: c),
           ),
@@ -424,7 +449,6 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
 
   @override
   Widget build(BuildContext context) {
-    final authUserState = Provider.of<UserState>(context);
     return Scaffold(
       body: Center(
         child: Stack(
@@ -589,7 +613,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                   size: 20,
                                 );
                               } else if (snapshot.hasError) {
-                                return Text("Terjadi kesalahan.");
+                                return const Text("Terjadi kesalahan.");
                               } else if (snapshot.hasData) {
                                 final data = snapshot.data!;
                                 if (data.isEmpty) {
@@ -618,7 +642,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                           }
                                         },
                                         child: Container(
-                                          padding: EdgeInsets.symmetric(
+                                          padding: const EdgeInsets.symmetric(
                                               vertical: 10),
                                           color: index % 2 == 1
                                               ? const Color(0xFFF6F6F6)
@@ -633,7 +657,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                                 radius: 20.0,
                                                 backgroundColor: Colors.white,
                                               ),
-                                              SizedBox(width: 8.0),
+                                              const SizedBox(width: 8.0),
                                               Expanded(
                                                 child: Column(
                                                   crossAxisAlignment:
@@ -641,13 +665,13 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                                   children: [
                                                     Text(
                                                       user['name'],
-                                                      style: TextStyle(
+                                                      style: const TextStyle(
                                                         fontWeight:
                                                             FontWeight.bold,
                                                         fontSize: 16.0,
                                                       ),
                                                     ),
-                                                    SizedBox(height: 4.0),
+                                                    const SizedBox(height: 4.0),
                                                     Text(data[index]['text']),
                                                   ],
                                                 ),
@@ -663,9 +687,8 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                                                     _showCommand(data[index]);
                                                   }
                                                 },
-                                                icon: const Icon(1 == 2
-                                                    ? Icons.more_vert
-                                                    : null),
+                                                icon:
+                                                    const Icon(Icons.more_vert),
                                               ),
                                             ],
                                           ),
@@ -682,7 +705,7 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 110),
+                  const SizedBox(height: 110),
                 ],
               ),
             ),

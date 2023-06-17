@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../home.dart';
 import '../mylib/auth.dart';
 import '../mylib/color.dart';
@@ -125,7 +126,8 @@ class _LoginState extends State<Login> {
                                 ),
                               ),
                               const SizedBox(height: 70),
-                              const Text("Tidak punya akun?"),
+                              const Text("Tidak punya akun?",
+                                  style: TextStyle(color: Colors.white)),
                               const SizedBox(height: 30),
                               MaterialButton(
                                 minWidth: 190,
@@ -208,10 +210,14 @@ class _LoginState extends State<Login> {
 
       if (response.statusCode == 200) {
         final token = jsonDecode(response.body)['token'];
-        setState(() {
-          saveToken(token);
-          setLogin();
-        });
+        saveToken(token);
+        setLogin();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        Map user = jsonDecode(response.body)['user'];
+        if (user['profile'] == "") {
+          user['profile'] = "https://paa.gunzxx.my.id/img/profile/default.png";
+        }
+        prefs.setString('authUser', jsonEncode(user));
         return await showDialog(
           context: context,
           builder: (context) {

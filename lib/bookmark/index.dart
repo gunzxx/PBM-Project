@@ -28,7 +28,7 @@ class _BookMarkState extends State<BookMark> {
     return Scaffold(
       backgroundColor: w1,
       appBar: AppBar(
-        elevation: 1,
+        elevation: 0,
         centerTitle: true,
         backgroundColor: w1,
         title: const Text(

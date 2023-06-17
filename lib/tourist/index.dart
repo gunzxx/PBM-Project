@@ -382,8 +382,11 @@ class _TouristState extends State<Tourist> {
                                                           boxShadow: const [
                                                             BoxShadow(
                                                               color: Color
-                                                                  .fromRGBO(0,
-                                                                      0, 0, .1),
+                                                                  .fromRGBO(
+                                                                      1,
+                                                                      150,
+                                                                      113,
+                                                                      .1),
                                                               blurRadius: 10,
                                                             )
                                                           ]),

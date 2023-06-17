@@ -62,7 +62,7 @@ class _CategoryPageState extends State<CategoryPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: bl1,
+        backgroundColor: bl2,
         title: Text(
           category.name,
           style: TextStyle(color: w1),
