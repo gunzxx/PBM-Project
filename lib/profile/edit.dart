@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -27,11 +30,27 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
-  bool _obscureText1 = true;
-  bool _obscureText2 = true;
   bool _isLoading = false;
+  File? _image;
+  late Map _user;
 
   _EditProfileState({required this.id});
+
+  void _gantiGambar() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.getImage(source: ImageSource.camera);
+    if (pickedImage != null) {
+      setState(() {
+        _image = File(pickedImage.path);
+      });
+    } else {
+      setState(() {
+        _image = null;
+      });
+    }
+
+    // print(_image!.readAsBytes());
+  }
 
   Future<Map> _getUser() async {
     try {
@@ -74,7 +93,7 @@ class _EditProfileState extends State<EditProfile> {
         return {};
       }
       final jwt = await getToken();
-      final response = await http.get(
+      http.Response response = await http.get(
         Uri.parse("https://paa.gunzxx.my.id/api/user/1"),
         headers: {"Authorization": "Bearer $jwt"},
       );
@@ -130,6 +149,14 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: w1,
@@ -141,6 +168,12 @@ class _EditProfileState extends State<EditProfile> {
           style: TextStyle(color: bl1),
         ),
         centerTitle: true,
+        leading: MaterialButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: Icon(Icons.arrow_back, color: bl1),
+        ),
       ),
       body: Center(
         child: GestureDetector(
@@ -152,6 +185,7 @@ class _EditProfileState extends State<EditProfile> {
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 final user = snapshot.data!;
+                _user = user;
                 _nameController.text = user['name'];
                 _emailController.text = user['email'];
                 _addressController.text = user['address'];
@@ -161,6 +195,48 @@ class _EditProfileState extends State<EditProfile> {
                     key: _formKey,
                     child: ListView(
                       children: [
+                        Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Container(
+                                  height: 70,
+                                  width: 70,
+                                  decoration: BoxDecoration(
+                                    color: w1,
+                                    borderRadius: BorderRadius.circular(7),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: bl1,
+                                        blurRadius: 1,
+                                      )
+                                    ],
+                                  ),
+                                  child: _image == null
+                                      ? Image.network(
+                                          user['profile'],
+                                          fit: BoxFit.contain,
+                                        )
+                                      : Image.file(_image!),
+                                ),
+                              ],
+                            ),
+                            MaterialButton(
+                              onPressed: _gantiGambar,
+                              color: bl1,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(7)),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 10),
+                              child: Text(
+                                "Unggah Profile",
+                                style: TextStyle(color: w1),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 30),
                         Container(
                           decoration: BoxDecoration(
                             color: w1,
@@ -362,106 +438,189 @@ class _EditProfileState extends State<EditProfile> {
         _isLoading = true;
       });
       final jwt = await getToken();
-      final response = await http.post(
-        Uri.parse("https://paa.gunzxx.my.id/api/user"),
-        headers: {"Authorization": "Bearer $jwt"},
-        body: {
-          "name": _nameController.text,
-          "address": _addressController.text,
-        },
-      );
-      setState(() {
-        _isLoading = false;
-      });
-      if (response.statusCode == 200) {
-        // print(jsonDecode(response.body));
-        if (!context.mounted) return {};
-        return showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              title: const Icon(
-                Icons.check_circle,
-                size: 64.0,
-                color: Colors.green,
-              ),
-              content: Text(
-                jsonDecode(response.body)['message'],
-                textAlign: TextAlign.center,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    // Navigator.of(context).pop();
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => Home()),
-                    );
-                  },
-                  child: const Text(
-                    'Oke',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.green,
-                    ),
-                  ),
-                ),
-              ],
-            );
+      if (_image == null) {
+        final Response response = await http.post(
+          Uri.parse("https://paa.gunzxx.my.id/api/user"),
+          headers: {"Authorization": "Bearer $jwt"},
+          body: {
+            "name": _nameController.text,
+            "address": _addressController.text,
           },
         );
-      } else {
-        if (!context.mounted) return {};
-        return showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              title: const Icon(
-                Icons.error_outline,
-                size: 64.0,
-                color: Colors.red,
-              ),
-              content: Text(
-                jsonDecode(response.body)['message'],
-                textAlign: TextAlign.center,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      color: Colors.green,
+        setState(() {
+          _isLoading = false;
+        });
+        if (response.statusCode == 200) {
+          if (!context.mounted) return {};
+          return showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                title: const Icon(
+                  Icons.check_circle,
+                  size: 64.0,
+                  color: Colors.green,
+                ),
+                content: Text(
+                  jsonDecode(response.body)['message'],
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      // Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => Home()),
+                      );
+                    },
+                    child: const Text(
+                      'Oke',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.green,
+                      ),
                     ),
                   ),
+                ],
+              );
+            },
+          );
+        } else {
+          if (!context.mounted) return {};
+          return showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
-              ],
-            );
-          },
-        ).then((_) {
-          Navigator.pop(context);
+                title: const Icon(
+                  Icons.error_outline,
+                  size: 64.0,
+                  color: Colors.red,
+                ),
+                content: Text(
+                  jsonDecode(response.body)['message'],
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ).then((_) {
+            Navigator.pop(context);
+          });
+        }
+      } else {
+        var request = http.MultipartRequest(
+            "POST", Uri.parse("https://paa.gunzxx.my.id/api/user"))
+          ..headers['Authorization'] = "Bearer $jwt"
+          ..fields['name'] = _nameController.text
+          ..fields['address'] = _addressController.text
+          ..files.add(http.MultipartFile.fromBytes(
+            "profile",
+            await _image!.readAsBytes(),
+            filename: "${_user['name']}_PP",
+          ));
+        final StreamedResponse response = await request.send();
+        final responseBody = await response.stream.bytesToString();
+        print(jsonDecode(responseBody));
+
+        setState(() {
+          _isLoading = false;
         });
+        if (response.statusCode == 200) {
+          if (!context.mounted) return {};
+          return showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                title: const Icon(
+                  Icons.check_circle,
+                  size: 64.0,
+                  color: Colors.green,
+                ),
+                content: Text(
+                  jsonDecode(responseBody)['message'],
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      // Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => Home()),
+                      );
+                    },
+                    child: const Text(
+                      'Oke',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        } else {
+          if (!context.mounted) return {};
+          return showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                title: const Icon(
+                  Icons.error_outline,
+                  size: 64.0,
+                  color: Colors.red,
+                ),
+                content: Text(
+                  jsonDecode(responseBody)['message'],
+                  textAlign: TextAlign.center,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'OK',
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ).then((_) {
+            Navigator.pop(context);
+          });
+        }
       }
     }
-  }
-
-  _obsecure1() {
-    setState(() {
-      _obscureText1 = _obscureText1 == true ? false : true;
-    });
-  }
-
-  _obsecure2() {
-    setState(() {
-      _obscureText2 = _obscureText2 == true ? false : true;
-    });
   }
 }
