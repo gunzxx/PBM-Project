@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
             } else if (snapshot.hasData) {
               final data = snapshot.data!;
               if (data == true) {
-                return const Home();
+                return Home();
               } else {
                 return const Login();
               }

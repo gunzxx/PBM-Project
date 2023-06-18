@@ -1,29 +1,42 @@
 import 'package:flutter/material.dart'
     show
-        StatefulWidget,
-        State,
-        BuildContext,
-        Widget,
-        Scaffold,
-        IndexedStack,
         BottomNavigationBar,
         BottomNavigationBarItem,
+        BuildContext,
         Icon,
-        Icons;
+        Icons,
+        IndexedStack,
+        Key,
+        Scaffold,
+        State,
+        StatefulWidget,
+        Widget;
 import 'package:pariwisata_jember/mylib/color.dart';
 import 'bookmark/index.dart' show BookMark;
 import 'profile/index.dart' show Profile;
 import 'tourist/index.dart' show Tourist;
 
+// ignore: must_be_immutable
 class Home extends StatefulWidget {
-  const Home({super.key});
+  int currentPage;
+  Home({
+    Key? key,
+    this.currentPage = 0,
+  }) : super(key: key) {
+    if (currentPage > 2) {
+      currentPage = 2;
+    }
+    if (currentPage < 0) {
+      currentPage = 0;
+    }
+  }
 
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
-  int _currentPage = 0;
+  _HomeState();
 
   final List<Widget> _screens = [
     const Tourist(),
@@ -34,16 +47,16 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: _screens[_currentPage],
+      // body: _screens[currentPage],
       body: IndexedStack(
-        index: _currentPage,
+        index: widget.currentPage,
         children: _screens,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentPage,
+        currentIndex: widget.currentPage,
         onTap: (value) {
           setState(() {
-            _currentPage = value;
+            widget.currentPage = value;
           });
         },
         enableFeedback: true,

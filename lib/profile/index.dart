@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:pariwisata_jember/profile/password.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth/login.dart';
@@ -74,6 +75,11 @@ class _ProfileState extends State<Profile> {
   initState() {
     super.initState();
     _futureGetUser = _getUserAuth();
+  }
+
+  @override
+  dispose() {
+    super.dispose();
   }
 
   @override
@@ -266,7 +272,13 @@ class _ProfileState extends State<Profile> {
                               color: bl1,
                             ),
                             child: InkWell(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(context, MaterialPageRoute(
+                                  builder: (context) {
+                                    return PasswordPage(id: user['id']);
+                                  },
+                                ));
+                              },
                               borderRadius: BorderRadius.circular(10),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(

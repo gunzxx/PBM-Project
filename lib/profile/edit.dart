@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart' as http;
 
 import '../home.dart';
 import '../mylib/color.dart';
@@ -31,8 +31,8 @@ class _EditProfileState extends State<EditProfile> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
   bool _isLoading = false;
-  File? _image;
   late Map _user;
+  File? _image;
 
   _EditProfileState({required this.id});
 
@@ -169,9 +169,11 @@ class _EditProfileState extends State<EditProfile> {
         ),
         centerTitle: true,
         leading: MaterialButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: _isLoading
+              ? null
+              : () {
+                  Navigator.pop(context);
+                },
           child: Icon(Icons.arrow_back, color: bl1),
         ),
       ),
@@ -417,7 +419,8 @@ class _EditProfileState extends State<EditProfile> {
                     Navigator.of(context).pop();
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => const Home()),
+                      MaterialPageRoute(
+                          builder: (context) => Home(currentPage: 2)),
                       (route) => false,
                     );
                   },
@@ -473,7 +476,8 @@ class _EditProfileState extends State<EditProfile> {
                     onPressed: () {
                       // Navigator.of(context).pop();
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => Home()),
+                        MaterialPageRoute(
+                            builder: (context) => Home(currentPage: 2)),
                       );
                     },
                     child: const Text(
@@ -567,7 +571,8 @@ class _EditProfileState extends State<EditProfile> {
                     onPressed: () {
                       // Navigator.of(context).pop();
                       Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => Home()),
+                        MaterialPageRoute(
+                            builder: (context) => Home(currentPage: 2)),
                       );
                     },
                     child: const Text(
