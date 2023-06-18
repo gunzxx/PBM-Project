@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -189,6 +190,47 @@ class _LoginState extends State<Login> {
 
   void _login() async {
     FocusScope.of(context).unfocus();
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      return await showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            title: const Icon(
+              Icons.error_outline,
+              size: 64.0,
+              color: Colors.red,
+            ),
+            content: const Text(
+              'Kesalahan jaringan.',
+              textAlign: TextAlign.center,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => const Home()),
+                    (route) => false,
+                  );
+                },
+                child: const Text(
+                  'OK',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.green,
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -255,7 +297,7 @@ class _LoginState extends State<Login> {
               ],
             );
           },
-        ).then((value) {
+        ).then((_) {
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(builder: (BuildContext context) => const Home()),

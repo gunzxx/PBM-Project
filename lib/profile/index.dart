@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -8,6 +9,7 @@ import '../auth/login.dart';
 import '../mylib/auth.dart';
 import '../mylib/bookmark.dart';
 import '../mylib/color.dart';
+import '../mylib/jwt.dart';
 import 'edit.dart';
 
 class Profile extends StatefulWidget {
@@ -23,19 +25,38 @@ class _ProfileState extends State<Profile> {
 
   Future<Map> _getUserAuth() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    Map user = jsonDecode(prefs.getString('authUser') ?? '{}');
+    Map authUser = jsonDecode(prefs.getString('authUser') ?? '{}');
 
-    if (user.isEmpty) {
+    if (authUser.isEmpty) {
       await resetBookmarks();
       if (!context.mounted) return {};
-      Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (BuildContext context) {
-        setLogout();
-        return const Login();
-      }), (route) => false);
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+        builder: (BuildContext context) {
+          setLogout();
+          return const Login();
+        },
+      ), (route) => false);
       return {};
     } else {
-      return user;
+      final jwt = await getToken();
+      final response = await http.get(
+        Uri.parse("https://paa.gunzxx.my.id/api/user/${authUser['id']}"),
+        headers: {"Authorization": "Bearer $jwt"},
+      );
+      try {
+        await saveToken(jsonDecode(response.body)['token']);
+        return jsonDecode(response.body)['user'];
+      } on Error catch (_) {
+        await resetBookmarks();
+        if (!context.mounted) return {};
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+          builder: (BuildContext context) {
+            setLogout();
+            return const Login();
+          },
+        ), (route) => false);
+        return {};
+      }
     }
   }
 
@@ -98,38 +119,30 @@ class _ProfileState extends State<Profile> {
                               ),
                             ],
                           ),
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                            child: Image.network(
-                              user['profile'],
-                              fit: BoxFit.contain,
-                            ),
+                          child: Image.network(
+                            user['profile'],
+                            fit: BoxFit.contain,
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Container(
-                            alignment: Alignment.topLeft,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  user['name'],
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 24,
-                                  ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                user['name'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
                                 ),
-                                Text(
-                                  user['email'],
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                  ),
+                              ),
+                              Text(
+                                user['email'],
+                                style: const TextStyle(
+                                  fontSize: 16,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                         Container(
@@ -215,26 +228,23 @@ class _ProfileState extends State<Profile> {
                                   horizontal: 15,
                                   vertical: 5,
                                 ),
-                                alignment: Alignment.centerLeft,
-                                child: const Expanded(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Edit Profil',
-                                        style: TextStyle(
-                                          color: w1,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.arrow_right,
+                                child: const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Edit Profil',
+                                      style: TextStyle(
                                         color: w1,
-                                      )
-                                    ],
-                                  ),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_right,
+                                      color: w1,
+                                    )
+                                  ],
                                 ),
                               ),
                             ),
@@ -263,26 +273,23 @@ class _ProfileState extends State<Profile> {
                                   horizontal: 15,
                                   vertical: 5,
                                 ),
-                                alignment: Alignment.centerLeft,
-                                child: const Expanded(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Ganti Password',
-                                        style: TextStyle(
-                                          color: w1,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.arrow_right,
+                                child: const Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Ganti Password',
+                                      style: TextStyle(
                                         color: w1,
-                                      )
-                                    ],
-                                  ),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.arrow_right,
+                                      color: w1,
+                                    )
+                                  ],
                                 ),
                               ),
                             ),

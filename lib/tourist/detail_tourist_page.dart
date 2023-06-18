@@ -191,6 +191,43 @@ class _DetailTouristPageState extends State<DetailTouristPage> {
   }
 
   _editComment(data) async {
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      if (!context.mounted) return;
+      Navigator.pop(context);
+      return showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              title: const Icon(
+                Icons.error_outline,
+                size: 64.0,
+                color: Colors.red,
+              ),
+              content: const Text(
+                "Kesalahan jaringan.",
+                textAlign: TextAlign.center,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      color: Colors.green,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          });
+    }
     final jwt = await getToken();
     if (!context.mounted) return;
     Navigator.pop(context);
