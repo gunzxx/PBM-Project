@@ -165,11 +165,13 @@ class _PasswordPageState extends State<PasswordPage> {
                 ],
               );
             },
-          ).then((_) {
-            Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => Home(currentPage: 2)),
-            );
-          });
+          ).then(
+            (_) {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => Home(currentPage: 2)),
+              );
+            },
+          );
         }
       }
     } on Error catch (_) {}
