@@ -149,10 +149,7 @@ class _PasswordPageState extends State<PasswordPage> {
                 actions: [
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                            builder: (context) => Home(currentPage: 2)),
-                      );
+                      Navigator.pop(context);
                     },
                     child: const Text(
                       'Oke',

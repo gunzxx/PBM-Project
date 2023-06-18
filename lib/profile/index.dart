@@ -128,6 +128,19 @@ class _ProfileState extends State<Profile> {
                           child: Image.network(
                             user['profile'],
                             fit: BoxFit.contain,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) {
+                                return child;
+                              }
+                              return Center(
+                                  child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ));
+                            },
                           ),
                         ),
                         const SizedBox(width: 10),

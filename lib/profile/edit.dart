@@ -36,7 +36,7 @@ class _EditProfileState extends State<EditProfile> {
 
   _EditProfileState({required this.id});
 
-  void _gantiGambar() async {
+  void _gantiGambarCamera() async {
     final picker = ImagePicker();
     final pickedImage = await picker.getImage(source: ImageSource.camera);
     if (pickedImage != null) {
@@ -48,8 +48,20 @@ class _EditProfileState extends State<EditProfile> {
         _image = null;
       });
     }
+  }
 
-    // print(_image!.readAsBytes());
+  void _gantiGambarGaleri() async {
+    final picker = ImagePicker();
+    final pickedImage = await picker.getImage(source: ImageSource.gallery);
+    if (pickedImage != null) {
+      setState(() {
+        _image = File(pickedImage.path);
+      });
+    } else {
+      setState(() {
+        _image = null;
+      });
+    }
   }
 
   Future<Map> _getUser() async {
@@ -94,7 +106,7 @@ class _EditProfileState extends State<EditProfile> {
       }
       final jwt = await getToken();
       http.Response response = await http.get(
-        Uri.parse("https://paa.gunzxx.my.id/api/user/1"),
+        Uri.parse("https://paa.gunzxx.my.id/api/user/$id"),
         headers: {"Authorization": "Bearer $jwt"},
       );
       if (response.statusCode == 200) {
@@ -224,17 +236,38 @@ class _EditProfileState extends State<EditProfile> {
                                 ),
                               ],
                             ),
-                            MaterialButton(
-                              onPressed: _gantiGambar,
-                              color: bl1,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(7)),
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 10),
-                              child: Text(
-                                "Unggah Profile",
-                                style: TextStyle(color: w1),
-                              ),
+                            SizedBox(height: 20),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                MaterialButton(
+                                  onPressed: _gantiGambarCamera,
+                                  color: bl1,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(7)),
+                                  minWidth: 150,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 10),
+                                  child: Text(
+                                    "Ambil foto",
+                                    style: TextStyle(color: w1),
+                                  ),
+                                ),
+                                SizedBox(width: 30),
+                                MaterialButton(
+                                  onPressed: _gantiGambarGaleri,
+                                  color: bl1,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(7)),
+                                  minWidth: 150,
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 10),
+                                  child: Text(
+                                    "Unggah gambar",
+                                    style: TextStyle(color: w1),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
