@@ -131,8 +131,7 @@ class _TouristMapState extends State<TouristMap> {
         "markers": markers,
         "polylines": polylines,
       };
-    }
-    if (response.statusCode == 404) {
+    } else if (response.statusCode == 404) {
       setState(() {
         _locationActive = true;
         _markers = markers;

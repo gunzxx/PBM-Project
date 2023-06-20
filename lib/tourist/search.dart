@@ -1,4 +1,5 @@
 import 'dart:convert' show jsonDecode;
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http show get;
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
@@ -67,6 +68,14 @@ class _SearchState extends State<Search> {
     super.dispose();
   }
 
+  _SearchState() {
+    var file = File('data.json');
+    var jsonString = file.readAsStringSync();
+
+    var datas = jsonDecode(jsonString);
+    print(datas);
+  }
+
   @override
   initState() {
     super.initState();
@@ -85,7 +94,7 @@ class _SearchState extends State<Search> {
           backgroundColor: bl1,
           title: const Text(
             "Cari pariwisata",
-            style: TextStyle(color: b1),
+            style: TextStyle(color: w1),
           ),
         ),
         body: Center(

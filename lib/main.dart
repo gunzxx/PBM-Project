@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart' show SpinKitCubeGrid;
+import 'package:pariwisata_jember/splash_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'auth/login.dart';
@@ -26,54 +27,62 @@ void main() async {
   );
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: FutureBuilder(
-          future: authCheck(),
-          builder: (BuildContext context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(
-                backgroundColor: w1,
-                body: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SpinKitCubeGrid(
-                          color: bl1,
-                          size: 50.0,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-            } else if (snapshot.hasError) {
-              return const Text("Data gagal diambil");
-            } else if (snapshot.hasData) {
-              final data = snapshot.data!;
-              if (data == true) {
-                return Home();
-              } else {
-                return const Login();
-              }
+        home: SplashScreen(),
+      ),
+    );
+  }
+}
+
+class MyApp2 extends StatelessWidget {
+  const MyApp2({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+
+    return SafeArea(
+      child: FutureBuilder(
+        future: authCheck(),
+        builder: (BuildContext context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              backgroundColor: w1,
+              body: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SpinKitCubeGrid(
+                        color: bl1,
+                        size: 50.0,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return const Text("Data gagal diambil");
+          } else if (snapshot.hasData) {
+            final data = snapshot.data!;
+            if (data == true) {
+              return Home();
             } else {
-              return const Text("Tidak ada data");
+              return const Login();
             }
-          },
-        ),
+          } else {
+            return const Text("Tidak ada data");
+          }
+        },
       ),
     );
   }
